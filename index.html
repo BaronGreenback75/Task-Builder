@@ -750,7 +750,7 @@
 
       <div class="nav-bar">
         <div></div>
-        <button class="btn btn-primary" onclick="goToStep(2)">Next: Subject & Details →</button>
+        <button class="btn btn-primary" onclick="console.log('Next clicked, form.programme=', form.programme); goToStep(2)">Next: Subject & Details →</button>
       </div>
     </div>
 
@@ -1150,6 +1150,7 @@ function goToStep(n) {
 // ============================================================
 
 function selectProgramme(p) {
+  console.log('selectProgramme called with:', p);
   form.programme = p;
   form.subject = '';
   ['MYP','DP','CP'].forEach(x => {
@@ -1157,8 +1158,14 @@ function selectProgramme(p) {
     if (el) el.classList.remove('selected');
   });
   const selected = document.getElementById('prog-' + p);
-  if (selected) selected.classList.add('selected');
+  if (selected) {
+    selected.classList.add('selected');
+    console.log('Added selected class to prog-' + p);
+  } else {
+    console.log('ERROR: could not find element prog-' + p);
+  }
   document.getElementById('mini-programme').textContent = p + ' — ' + ({MYP:'Middle Years',DP:'Diploma',CP:'Career-related'}[p]);
+  console.log('form.programme is now:', form.programme);
 }
 
 // ============================================================

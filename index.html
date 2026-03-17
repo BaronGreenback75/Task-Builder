@@ -268,7 +268,10 @@
     transition: all 0.2s;
     text-align: center;
     background: white;
+    font-family: 'DM Sans', sans-serif;
+    width: 100%;
   }
+  .prog-card * { pointer-events: none; }
   .prog-card:hover { border-color: var(--gess-green-light); background: var(--gess-green-pale); }
   .prog-card.selected {
     border-color: var(--gess-green);
@@ -731,18 +734,18 @@
       </div>
 
       <div class="programme-cards">
-        <div class="prog-card" onclick="selectProgramme('MYP')" id="prog-MYP">
+        <button class="prog-card" id="prog-MYP">
           <div class="prog-abbr">MYP</div>
           <div class="prog-name">Middle Years<br>Programme</div>
-        </div>
-        <div class="prog-card" onclick="selectProgramme('DP')" id="prog-DP">
+        </button>
+        <button class="prog-card" id="prog-DP">
           <div class="prog-abbr">DP</div>
           <div class="prog-name">Diploma<br>Programme</div>
-        </div>
-        <div class="prog-card" onclick="selectProgramme('CP')" id="prog-CP">
+        </button>
+        <button class="prog-card" id="prog-CP">
           <div class="prog-abbr">CP</div>
           <div class="prog-name">Career-related<br>Programme</div>
-        </div>
+        </button>
       </div>
 
       <div class="nav-bar">
@@ -1148,7 +1151,7 @@ function goToStep(n) {
 
 function selectProgramme(p) {
   form.programme = p;
-  form.subject = ''; // reset subject when programme changes
+  form.subject = '';
   ['MYP','DP','CP'].forEach(x => {
     const el = document.getElementById('prog-' + x);
     if (el) el.classList.remove('selected');
@@ -1840,7 +1843,10 @@ function buildRubricTables(p, Document, Paragraph, TextRun, Table, TableRow, Tab
 
 // Build happens when navigating to step 2, not on load
 window.addEventListener('load', () => {
-  // Nothing needed on load - state initialises fresh
+  // Wire up programme cards via addEventListener (more reliable than inline onclick)
+  document.getElementById('prog-MYP').addEventListener('click', () => selectProgramme('MYP'));
+  document.getElementById('prog-DP').addEventListener('click',  () => selectProgramme('DP'));
+  document.getElementById('prog-CP').addEventListener('click',  () => selectProgramme('CP'));
 });
 </script>
 </body>

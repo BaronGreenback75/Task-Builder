@@ -1,0 +1,1847 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GESS Assessment Task Sheet Builder</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/docx/8.5.0/docx.umd.min.js"></script>
+<style>
+  :root {
+    --gess-green: #1A6B3A;
+    --gess-green-light: #2a8a4e;
+    --gess-green-pale: #e8f4ed;
+    --gess-green-mid: #c5e0ce;
+    --accent: #f0a500;
+    --bg: #f7f8f5;
+    --white: #ffffff;
+    --text: #1a1f1c;
+    --text-muted: #6b7a70;
+    --border: #d4dfd8;
+    --step-inactive: #b8ccc0;
+    --radius: 12px;
+    --shadow: 0 2px 12px rgba(26,107,58,0.08);
+    --shadow-lg: 0 8px 32px rgba(26,107,58,0.14);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  /* Header */
+  .header {
+    background: var(--gess-green);
+    color: white;
+    padding: 0 40px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 70px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 16px rgba(26,107,58,0.25);
+  }
+  .header-logo {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .logo-badge {
+    width: 40px; height: 40px;
+    background: white;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'DM Serif Display', serif;
+    font-size: 18px;
+    color: var(--gess-green);
+    font-weight: 700;
+    letter-spacing: -1px;
+  }
+  .header h1 {
+    font-size: 16px;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+  }
+  .header-sub {
+    font-size: 12px;
+    opacity: 0.75;
+    font-weight: 400;
+  }
+  .header-right {
+    font-size: 12px;
+    opacity: 0.7;
+  }
+
+  /* Layout */
+  .app-layout {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    min-height: calc(100vh - 70px);
+  }
+
+  /* Sidebar */
+  .sidebar {
+    background: white;
+    border-right: 1px solid var(--border);
+    padding: 32px 24px;
+    position: sticky;
+    top: 70px;
+    height: calc(100vh - 70px);
+    overflow-y: auto;
+  }
+  .sidebar-title {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-muted);
+    margin-bottom: 20px;
+  }
+
+  .step-list { display: flex; flex-direction: column; gap: 4px; }
+  .step-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: 1px solid transparent;
+  }
+  .step-item:hover { background: var(--gess-green-pale); }
+  .step-item.active {
+    background: var(--gess-green-pale);
+    border-color: var(--gess-green-mid);
+  }
+  .step-item.completed .step-num { background: var(--gess-green); color: white; }
+  .step-num {
+    width: 26px; height: 26px;
+    border-radius: 50%;
+    background: var(--border);
+    color: var(--text-muted);
+    font-size: 12px;
+    font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.2s;
+  }
+  .step-item.active .step-num {
+    background: var(--gess-green);
+    color: white;
+  }
+  .step-label { font-size: 13px; font-weight: 500; }
+  .step-item.active .step-label { color: var(--gess-green); font-weight: 600; }
+  .step-item.completed .step-label { color: var(--text-muted); }
+
+  .sidebar-divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 24px 0;
+  }
+
+  .preview-mini {
+    background: var(--gess-green-pale);
+    border-radius: 8px;
+    padding: 14px;
+  }
+  .preview-mini-title {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--gess-green);
+    margin-bottom: 10px;
+  }
+  .preview-mini-field {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-bottom: 4px;
+  }
+  .preview-mini-val {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  /* Main Content */
+  .main-content {
+    padding: 40px 48px;
+    max-width: 860px;
+  }
+
+  .step-panel { display: none; }
+  .step-panel.active { display: block; }
+
+  .step-header {
+    margin-bottom: 32px;
+  }
+  .step-tag {
+    display: inline-block;
+    background: var(--gess-green-pale);
+    color: var(--gess-green);
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    padding: 4px 10px;
+    border-radius: 4px;
+    margin-bottom: 10px;
+  }
+  .step-header h2 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 28px;
+    color: var(--text);
+    margin-bottom: 8px;
+  }
+  .step-header p {
+    font-size: 14px;
+    color: var(--text-muted);
+    line-height: 1.6;
+  }
+
+  /* Form elements */
+  .form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 24px;
+  }
+  .form-grid.single { grid-template-columns: 1fr; }
+  .form-grid.thirds { grid-template-columns: 1fr 1fr 1fr; }
+
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .field.span2 { grid-column: span 2; }
+
+  label {
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: var(--text-muted);
+  }
+  label .required { color: #e05252; margin-left: 2px; }
+
+  input[type="text"],
+  input[type="date"],
+  select,
+  textarea {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 14px;
+    background: white;
+    color: var(--text);
+    transition: border-color 0.2s, box-shadow 0.2s;
+    outline: none;
+    width: 100%;
+  }
+  input:focus, select:focus, textarea:focus {
+    border-color: var(--gess-green);
+    box-shadow: 0 0 0 3px rgba(26,107,58,0.1);
+  }
+  textarea { resize: vertical; min-height: 100px; line-height: 1.6; }
+
+  /* Programme cards */
+  .programme-cards {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-bottom: 28px;
+  }
+  .prog-card {
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    padding: 20px 16px;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: center;
+    background: white;
+  }
+  .prog-card:hover { border-color: var(--gess-green-light); background: var(--gess-green-pale); }
+  .prog-card.selected {
+    border-color: var(--gess-green);
+    background: var(--gess-green-pale);
+    box-shadow: 0 0 0 3px rgba(26,107,58,0.12);
+  }
+  .prog-card .prog-abbr {
+    font-family: 'DM Serif Display', serif;
+    font-size: 32px;
+    color: var(--gess-green);
+    margin-bottom: 6px;
+  }
+  .prog-card .prog-name {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-muted);
+  }
+
+  /* Subject grid */
+  .subject-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-bottom: 24px;
+  }
+  .subject-btn {
+    padding: 10px 12px;
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    background: white;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: left;
+    color: var(--text);
+  }
+  .subject-btn:hover { border-color: var(--gess-green); background: var(--gess-green-pale); }
+  .subject-btn.selected {
+    border-color: var(--gess-green);
+    background: var(--gess-green);
+    color: white;
+  }
+
+  /* Criteria checkboxes */
+  .criteria-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 28px;
+  }
+  .criteria-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 14px 16px;
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    background: white;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .criteria-item:hover { border-color: var(--gess-green); }
+  .criteria-item.selected { border-color: var(--gess-green); background: var(--gess-green-pale); }
+  .criteria-checkbox {
+    width: 20px; height: 20px;
+    border-radius: 5px;
+    border: 2px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    margin-top: 1px;
+    transition: all 0.2s;
+  }
+  .criteria-item.selected .criteria-checkbox {
+    background: var(--gess-green);
+    border-color: var(--gess-green);
+  }
+  .criteria-checkbox svg { display: none; }
+  .criteria-item.selected .criteria-checkbox svg { display: block; }
+  .criteria-letter {
+    font-weight: 800;
+    font-size: 15px;
+    color: var(--gess-green);
+    margin-right: 4px;
+  }
+  .criteria-item.selected .criteria-letter { color: var(--gess-green); }
+  .criteria-name { font-size: 13px; font-weight: 600; margin-bottom: 2px; }
+  .criteria-desc { font-size: 12px; color: var(--text-muted); line-height: 1.5; }
+
+  /* ATL Section */
+  .atl-category {
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    background: white;
+    margin-bottom: 12px;
+    overflow: hidden;
+  }
+  .atl-cat-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 16px;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .atl-cat-header:hover { background: var(--gess-green-pale); }
+  .atl-cat-icon {
+    width: 32px; height: 32px;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+    flex-shrink: 0;
+  }
+  .atl-cat-name { font-size: 14px; font-weight: 700; flex: 1; }
+  .atl-cat-count {
+    font-size: 11px;
+    color: var(--gess-green);
+    font-weight: 700;
+    background: var(--gess-green-pale);
+    padding: 2px 8px;
+    border-radius: 10px;
+  }
+  .atl-cat-toggle { font-size: 18px; color: var(--text-muted); transition: transform 0.2s; }
+  .atl-cat-toggle.open { transform: rotate(90deg); }
+
+  .atl-skills {
+    display: none;
+    padding: 0 16px 16px;
+    border-top: 1px solid var(--border);
+  }
+  .atl-skills.open { display: block; }
+  .atl-skill-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    padding-top: 12px;
+  }
+  .atl-skill-btn {
+    padding: 10px 12px;
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    background: white;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: center;
+    line-height: 1.3;
+  }
+  .atl-skill-btn .atl-level {
+    display: block;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 3px;
+    font-weight: 700;
+  }
+  .atl-skill-btn:hover { border-color: var(--gess-green); }
+  .atl-skill-btn.selected { border-color: var(--gess-green); background: var(--gess-green); color: white; }
+  .atl-skill-btn.selected .atl-level { color: rgba(255,255,255,0.75); }
+  .atl-level-surface { color: #e07a00; }
+  .atl-level-deep { color: #c0392b; }
+  .atl-level-transfer { color: #1a6b3a; }
+  .atl-skill-btn.selected .atl-level-surface,
+  .atl-skill-btn.selected .atl-level-deep,
+  .atl-skill-btn.selected .atl-level-transfer { color: rgba(255,255,255,0.8); }
+
+  /* AI Level cards */
+  .ai-level-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 24px;
+  }
+  .ai-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    padding: 16px 18px;
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: white;
+  }
+  .ai-card:hover { border-color: var(--gess-green-light); }
+  .ai-card.selected { border-color: var(--gess-green); background: var(--gess-green-pale); }
+  .ai-level-num {
+    width: 36px; height: 36px;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+    font-weight: 800;
+    flex-shrink: 0;
+    border: 2px solid currentColor;
+  }
+  .ai-level-0 { color: #555; border-color: #ccc; }
+  .ai-level-1 { color: #2980b9; border-color: #2980b9; }
+  .ai-level-2 { color: #8e44ad; border-color: #8e44ad; }
+  .ai-level-3 { color: #e07a00; border-color: #e07a00; }
+  .ai-level-4 { color: var(--gess-green); border-color: var(--gess-green); }
+  .ai-card-content { flex: 1; }
+  .ai-card-name { font-size: 14px; font-weight: 700; margin-bottom: 3px; }
+  .ai-card-desc { font-size: 12px; color: var(--text-muted); line-height: 1.5; }
+  .ai-disclosure {
+    font-size: 11px;
+    font-style: italic;
+    color: var(--gess-green);
+    margin-top: 4px;
+  }
+
+  /* Navigation buttons */
+  .nav-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 40px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
+  }
+  .btn {
+    padding: 11px 24px;
+    border-radius: 8px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: none;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .btn-primary {
+    background: var(--gess-green);
+    color: white;
+  }
+  .btn-primary:hover { background: var(--gess-green-light); }
+  .btn-secondary {
+    background: transparent;
+    color: var(--text-muted);
+    border: 1.5px solid var(--border);
+  }
+  .btn-secondary:hover { background: var(--gess-green-pale); color: var(--text); }
+  .btn-ghost { background: transparent; color: var(--text-muted); }
+  .btn-ghost:hover { color: var(--text); }
+  .btn-generate {
+    background: var(--accent);
+    color: white;
+    font-size: 15px;
+    padding: 13px 28px;
+  }
+  .btn-generate:hover { background: #d4940a; }
+  .btn:disabled { opacity: 0.45; cursor: not-allowed; }
+
+  /* Preview panel (step 7) */
+  .preview-card {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 32px;
+    margin-bottom: 24px;
+    box-shadow: var(--shadow);
+  }
+  .preview-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 2px solid var(--gess-green);
+  }
+  .preview-gess {
+    font-family: 'DM Serif Display', serif;
+    font-size: 22px;
+    color: var(--gess-green);
+  }
+  .preview-doc-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-muted);
+  }
+
+  .preview-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    margin-bottom: 16px;
+  }
+  .preview-table td {
+    padding: 8px 12px;
+    border: 1px solid var(--border);
+    vertical-align: top;
+  }
+  .preview-table .field-label {
+    background: var(--gess-green-pale);
+    font-weight: 700;
+    color: var(--gess-green);
+    width: 35%;
+    font-size: 12px;
+  }
+  .preview-table .span-row td { background: var(--gess-green); color: white; font-weight: 700; font-size: 12px; text-transform: uppercase; letter-spacing: 0.06em; }
+
+  .tag-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 8px;
+  }
+  .tag {
+    padding: 3px 10px;
+    border-radius: 100px;
+    font-size: 11px;
+    font-weight: 700;
+  }
+  .tag-atl { background: var(--gess-green-pale); color: var(--gess-green); border: 1px solid var(--gess-green-mid); }
+  .tag-ai { background: #fff3cd; color: #856404; border: 1px solid #ffc107; }
+
+  /* Selected summary chips */
+  .chip-row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--gess-green-pale);
+    color: var(--gess-green);
+    border: 1px solid var(--gess-green-mid);
+    border-radius: 20px;
+    padding: 4px 12px;
+    font-size: 12px;
+    font-weight: 600;
+  }
+  .chip-remove {
+    cursor: pointer;
+    opacity: 0.6;
+    font-size: 14px;
+    line-height: 1;
+  }
+  .chip-remove:hover { opacity: 1; }
+
+  .section-label {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    margin-bottom: 12px;
+    margin-top: 24px;
+  }
+
+  /* Info callout */
+  .callout {
+    background: var(--gess-green-pale);
+    border-left: 3px solid var(--gess-green);
+    border-radius: 0 8px 8px 0;
+    padding: 12px 16px;
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-bottom: 20px;
+    line-height: 1.6;
+  }
+
+  .hidden { display: none !important; }
+
+  /* Success state */
+  .success-banner {
+    background: var(--gess-green);
+    color: white;
+    border-radius: 12px;
+    padding: 20px 24px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+  .success-icon { font-size: 32px; }
+  .success-text h3 { font-size: 16px; margin-bottom: 4px; }
+  .success-text p { font-size: 13px; opacity: 0.85; }
+
+  @media (max-width: 900px) {
+    .app-layout { grid-template-columns: 1fr; }
+    .sidebar { display: none; }
+    .main-content { padding: 24px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="header-logo">
+    <div class="logo-badge">G</div>
+    <div>
+      <div style="font-weight:700;font-size:15px;">GESS Assessment Builder</div>
+      <div class="header-sub">Task Sheet Generator — All IB Programmes</div>
+    </div>
+  </div>
+  <div class="header-right">German European School Singapore</div>
+</header>
+
+<div class="app-layout">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-title">Steps</div>
+    <div class="step-list">
+      <div class="step-item active" onclick="goToStep(1)" id="step-nav-1">
+        <div class="step-num">1</div>
+        <div class="step-label">Programme</div>
+      </div>
+      <div class="step-item" onclick="goToStep(2)" id="step-nav-2">
+        <div class="step-num">2</div>
+        <div class="step-label">Subject & Details</div>
+      </div>
+      <div class="step-item" onclick="goToStep(3)" id="step-nav-3">
+        <div class="step-num">3</div>
+        <div class="step-label">Task Information</div>
+      </div>
+      <div class="step-item" onclick="goToStep(4)" id="step-nav-4">
+        <div class="step-num">4</div>
+        <div class="step-label">Criteria & Objectives</div>
+      </div>
+      <div class="step-item" onclick="goToStep(5)" id="step-nav-5">
+        <div class="step-num">5</div>
+        <div class="step-label">Success Criteria</div>
+      </div>
+      <div class="step-item" onclick="goToStep(6)" id="step-nav-6">
+        <div class="step-num">6</div>
+        <div class="step-label">ATLs & AI Level</div>
+      </div>
+      <div class="step-item" onclick="goToStep(7)" id="step-nav-7">
+        <div class="step-num">7</div>
+        <div class="step-label">Preview & Export</div>
+      </div>
+    </div>
+
+    <hr class="sidebar-divider">
+
+    <div class="preview-mini">
+      <div class="preview-mini-title">Current Task</div>
+      <div id="mini-programme" class="preview-mini-field">No programme selected</div>
+      <div id="mini-subject" class="preview-mini-field" style="display:none">
+        <span class="preview-mini-val" id="mini-subject-val"></span>
+      </div>
+      <div id="mini-unit" class="preview-mini-field" style="display:none">
+        <span class="preview-mini-val" id="mini-unit-val"></span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <main class="main-content">
+
+    <!-- STEP 1: Programme -->
+    <div class="step-panel active" id="panel-1">
+      <div class="step-header">
+        <div class="step-tag">Step 1 of 7</div>
+        <h2>Select IB Programme</h2>
+        <p>Choose the programme this assessment belongs to. This will determine the available subjects and criteria.</p>
+      </div>
+
+      <div class="programme-cards">
+        <div class="prog-card" onclick="selectProgramme('MYP')" id="prog-MYP">
+          <div class="prog-abbr">MYP</div>
+          <div class="prog-name">Middle Years<br>Programme</div>
+        </div>
+        <div class="prog-card" onclick="selectProgramme('DP')" id="prog-DP">
+          <div class="prog-abbr">DP</div>
+          <div class="prog-name">Diploma<br>Programme</div>
+        </div>
+        <div class="prog-card" onclick="selectProgramme('CP')" id="prog-CP">
+          <div class="prog-abbr">CP</div>
+          <div class="prog-name">Career-related<br>Programme</div>
+        </div>
+      </div>
+
+      <div class="nav-bar">
+        <div></div>
+        <button class="btn btn-primary" onclick="goToStep(2)">Next: Subject & Details →</button>
+      </div>
+    </div>
+
+    <!-- STEP 2: Subject & Details -->
+    <div class="step-panel" id="panel-2">
+      <div class="step-header">
+        <div class="step-tag">Step 2 of 7</div>
+        <h2>Subject & Class Details</h2>
+        <p>Select the subject and fill in the basic information for this assessment.</p>
+      </div>
+
+      <div class="section-label">Subject</div>
+      <div class="subject-grid" id="subject-grid"></div>
+
+      <div id="custom-subject-wrap" class="field" style="margin-bottom:20px; display:none;">
+        <label>Custom Subject Name</label>
+        <input type="text" id="custom-subject" placeholder="e.g. Film Studies" oninput="form.subject = this.value; updateMini()">
+      </div>
+
+      <div class="section-label">Class Details</div>
+      <div class="form-grid thirds">
+        <div class="field">
+          <label>Year / Grade <span class="required">*</span></label>
+          <input type="text" id="grade" placeholder="e.g. Grade 9 / Year 11" oninput="form.grade = this.value">
+        </div>
+        <div class="field">
+          <label>Due Date</label>
+          <input type="date" id="dueDate" onchange="form.dueDate = this.value">
+        </div>
+        <div class="field">
+          <label>Homeroom</label>
+          <input type="text" id="homeroom" placeholder="e.g. D318" oninput="form.homeroom = this.value">
+        </div>
+      </div>
+
+      <div class="form-grid">
+        <div class="field">
+          <label>Unit Title <span class="required">*</span></label>
+          <input type="text" id="unitTitle" placeholder="e.g. Ethics and Religion" oninput="form.unitTitle = this.value; updateMini()">
+        </div>
+        <div class="field">
+          <label>Teacher Name</label>
+          <input type="text" id="teacherName" placeholder="e.g. Mr Thomas" oninput="form.teacherName = this.value">
+        </div>
+      </div>
+
+      <div class="nav-bar">
+        <button class="btn btn-secondary" onclick="goToStep(1)">← Back</button>
+        <button class="btn btn-primary" onclick="goToStep(3)">Next: Task Information →</button>
+      </div>
+    </div>
+
+    <!-- STEP 3: Task Information -->
+    <div class="step-panel" id="panel-3">
+      <div class="step-header">
+        <div class="step-tag">Step 3 of 7</div>
+        <h2>Task Information</h2>
+        <p>Describe the form and nature of the assessment task.</p>
+      </div>
+
+      <div class="form-grid single">
+        <div class="field">
+          <label>Form of Assessment <span class="required">*</span></label>
+          <input type="text" id="formOfAssessment" placeholder="e.g. Essay 800–1000 words, MLA format" oninput="form.formOfAssessment = this.value">
+        </div>
+      </div>
+
+      <div class="form-grid single">
+        <div class="field">
+          <label>Task Description / Question <span class="required">*</span></label>
+          <textarea id="taskDescription" rows="5" placeholder="Enter the full task question or description here..." oninput="form.taskDescription = this.value"></textarea>
+        </div>
+      </div>
+
+      <div class="form-grid single">
+        <div class="field">
+          <label>Additional Instructions (optional)</label>
+          <textarea id="additionalInstructions" rows="3" placeholder="Any additional notes, resources, or guidance for students..." oninput="form.additionalInstructions = this.value"></textarea>
+        </div>
+      </div>
+
+      <div class="nav-bar">
+        <button class="btn btn-secondary" onclick="goToStep(2)">← Back</button>
+        <button class="btn btn-primary" onclick="goToStep(4)">Next: Criteria →</button>
+      </div>
+    </div>
+
+    <!-- STEP 4: Criteria -->
+    <div class="step-panel" id="panel-4">
+      <div class="step-header">
+        <div class="step-tag">Step 4 of 7</div>
+        <h2>Assessment Criteria & Objectives</h2>
+        <p>Select the criteria being assessed in this task. The relevant objectives will be included in the output document.</p>
+      </div>
+
+      <div class="callout">
+        Tick all criteria that apply to this assessment. The full subject objectives for each selected criterion will appear in the final document, or you can customise them below.
+      </div>
+
+      <div class="criteria-list" id="criteria-list"></div>
+
+      <div class="nav-bar">
+        <button class="btn btn-secondary" onclick="goToStep(3)">← Back</button>
+        <button class="btn btn-primary" onclick="goToStep(5)">Next: Success Criteria →</button>
+      </div>
+    </div>
+
+    <!-- STEP 5: Success Criteria -->
+    <div class="step-panel" id="panel-5">
+      <div class="step-header">
+        <div class="step-tag">Step 5 of 7</div>
+        <h2>Success Criteria</h2>
+        <p>Enter the task-specific success criteria. These are the "I can..." or "I have..." statements students can use to check their work.</p>
+      </div>
+
+      <div class="callout">
+        Add each success criterion as a separate item. Students use these to self-assess before submitting.
+      </div>
+
+      <div id="success-criteria-list"></div>
+      <button class="btn btn-secondary" onclick="addSuccessCriterion()" style="margin-bottom:24px;">
+        + Add Success Criterion
+      </button>
+
+      <div class="nav-bar">
+        <button class="btn btn-secondary" onclick="goToStep(4)">← Back</button>
+        <button class="btn btn-primary" onclick="goToStep(6)">Next: ATLs & AI →</button>
+      </div>
+    </div>
+
+    <!-- STEP 6: ATLs & AI -->
+    <div class="step-panel" id="panel-6">
+      <div class="step-header">
+        <div class="step-tag">Step 6 of 7</div>
+        <h2>ATL Skills & AI Level</h2>
+        <p>Select the Approaches to Learning skills being developed, and set the approved AI usage level for this task.</p>
+      </div>
+
+      <div class="section-label">Approaches to Learning (ATL) Skills</div>
+      <div class="callout">Select one or more skill descriptors from any ATL category. Expand a category to see Surface → Deep → Transfer options.</div>
+
+      <div id="atl-container"></div>
+
+      <div class="section-label" style="margin-top:28px;">AI Acceptable Use Level</div>
+      <div class="callout">Select the single approved AI usage level for this assessment task (GESS AI Acceptable Use Scale).</div>
+
+      <div class="ai-level-cards" id="ai-cards"></div>
+
+      <div class="nav-bar">
+        <button class="btn btn-secondary" onclick="goToStep(5)">← Back</button>
+        <button class="btn btn-primary" onclick="goToStep(7)">Next: Preview & Export →</button>
+      </div>
+    </div>
+
+    <!-- STEP 7: Preview & Export -->
+    <div class="step-panel" id="panel-7">
+      <div class="step-header">
+        <div class="step-tag">Step 7 of 7</div>
+        <h2>Preview & Download</h2>
+        <p>Review your assessment task sheet, then download it as a formatted Word document.</p>
+      </div>
+
+      <div id="preview-content"></div>
+
+      <div class="nav-bar">
+        <button class="btn btn-secondary" onclick="goToStep(6)">← Back</button>
+        <button class="btn btn-generate" onclick="generateDocx()">⬇ Download Word Document</button>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+// ============================================================
+// DATA
+// ============================================================
+
+const SUBJECTS = {
+  MYP: [
+    'Language & Literature','Language Acquisition','Mathematics','Sciences',
+    'Individuals & Societies','Arts','Physical & Health Education',
+    'Design','Ethics','Media Arts','Other'
+  ],
+  DP: [
+    'Language A (Literature)','Language A (Lang & Lit)','Language B','Mathematics',
+    'Biology','Chemistry','Physics','Environmental Systems',
+    'History','Geography','Economics','Business Management',
+    'Psychology','Philosophy','Visual Arts','Theatre','Music',
+    'Computer Science','Other'
+  ],
+  CP: [
+    'Language Development','Personal & Professional Skills','Service Learning',
+    'Reflective Project','Career-related Study','Other'
+  ]
+};
+
+const CRITERIA_DATA = {
+  MYP: {
+    'Language & Literature': [
+      { letter:'A', name:'Analysing', desc:'Understand and analyse language, structure, technique and style' },
+      { letter:'B', name:'Organising', desc:'Organize ideas using organizational structures and referencing' },
+      { letter:'C', name:'Producing text', desc:'Produce written and spoken text using appropriate language' },
+      { letter:'D', name:'Using language', desc:'Use language accurately and effectively' }
+    ],
+    'Language Acquisition': [
+      { letter:'A', name:'Comprehending spoken and visual text', desc:'Listen to, view and respond to a range of spoken, visual and audio-visual text' },
+      { letter:'B', name:'Comprehending written and visual text', desc:'Read and respond to a range of written, visual and multimodal text' },
+      { letter:'C', name:'Communicating in response to spoken, written and visual text', desc:'Respond orally and in writing to a range of spoken, written and visual text' },
+      { letter:'D', name:'Using language in spoken and written form', desc:'Interact using spoken and written language in a range of situations' }
+    ],
+    'Mathematics': [
+      { letter:'A', name:'Knowing and understanding', desc:'Select appropriate mathematics when solving problems' },
+      { letter:'B', name:'Investigating patterns', desc:'Investigate mathematical properties and relationships' },
+      { letter:'C', name:'Communicating', desc:'Use appropriate mathematical language and reasoning' },
+      { letter:'D', name:'Applying mathematics in real-life contexts', desc:'Transfer theoretical mathematical knowledge into real-world situations' }
+    ],
+    'Sciences': [
+      { letter:'A', name:'Knowing and understanding', desc:'Recall and apply scientific knowledge' },
+      { letter:'B', name:'Inquiring and designing', desc:'Design scientific investigations and hypotheses' },
+      { letter:'C', name:'Processing and evaluating', desc:'Collect, process and evaluate data and conclusions' },
+      { letter:'D', name:'Reflecting on the impacts of science', desc:'Consider the ethical and social impacts of scientific developments' }
+    ],
+    'Individuals & Societies': [
+      { letter:'A', name:'Knowing and understanding', desc:'Use terminology; demonstrate knowledge of subject content and concepts' },
+      { letter:'B', name:'Investigating', desc:'Formulate research questions; use research strategies' },
+      { letter:'C', name:'Communicating', desc:'Communicate information and ideas; document sources' },
+      { letter:'D', name:'Thinking critically', desc:'Discuss and evaluate concepts, perspectives and arguments' }
+    ],
+    'Ethics': [
+      { letter:'A', name:'Knowing & Understanding', desc:'Use a range of terminology in context; demonstrate knowledge and understanding of subject-specific content and concepts through descriptions, explanations and examples' },
+      { letter:'B', name:'Application & Engagement', desc:'Understand ethical implications of different situations; apply ethical concepts to real world situations; show personal engagement with ethical dilemmas; understand the impact of ethical situations' },
+      { letter:'C', name:'Communicating', desc:'Communicate information and ideas using an appropriate style for audience and purpose; structure information appropriately; document sources using a recognised convention' },
+      { letter:'D', name:'Thinking Critically', desc:'Discuss concepts, issues, models and theories; synthesize information to make valid arguments; analyse and evaluate sources; interpret different perspectives and their implications' }
+    ],
+    'Arts': [
+      { letter:'A', name:'Knowing and understanding', desc:'Demonstrate knowledge of arts in context, cultural significance and creative processes' },
+      { letter:'B', name:'Developing skills', desc:'Demonstrate and apply technical skills and processes' },
+      { letter:'C', name:'Thinking creatively', desc:'Create, develop and communicate artistic intention' },
+      { letter:'D', name:'Responding', desc:'Evaluate the quality of work through personal reflection and feedback' }
+    ],
+    'Physical & Health Education': [
+      { letter:'A', name:'Knowing and understanding', desc:'Explain physical activity concepts; identify skills and techniques' },
+      { letter:'B', name:'Planning for performance', desc:'Develop and apply plans to enhance performance' },
+      { letter:'C', name:'Applying and performing', desc:'Demonstrate and apply movement composition and skills' },
+      { letter:'D', name:'Reflecting and improving performance', desc:'Evaluate personal performance and set goals' }
+    ],
+    'Design': [
+      { letter:'A', name:'Inquiring and analysing', desc:'Explain and justify the need for a solution' },
+      { letter:'B', name:'Developing ideas', desc:'Develop a design brief and produce multiple design ideas' },
+      { letter:'C', name:'Creating the solution', desc:'Construct a solution and use materials and tools' },
+      { letter:'D', name:'Evaluating', desc:'Evaluate the success of the solution and personal performance' }
+    ],
+    'Media Arts': [
+      { letter:'A', name:'Knowing and understanding', desc:'Demonstrate knowledge of media arts in context' },
+      { letter:'B', name:'Developing skills', desc:'Apply media arts skills and techniques' },
+      { letter:'C', name:'Thinking creatively', desc:'Create and develop a media arts product with artistic intention' },
+      { letter:'D', name:'Responding', desc:'Evaluate the quality of media arts products through reflection and feedback' }
+    ],
+    'default': [
+      { letter:'A', name:'Knowing and understanding', desc:'Demonstrate knowledge and understanding of subject content, concepts and terminology' },
+      { letter:'B', name:'Application and analysis', desc:'Apply knowledge and skills; analyse and explain' },
+      { letter:'C', name:'Communicating', desc:'Communicate information and ideas clearly and appropriately' },
+      { letter:'D', name:'Thinking critically / Reflecting', desc:'Evaluate, reflect and respond to feedback' }
+    ]
+  },
+  DP: {
+    'default': [
+      { letter:'A', name:'Knowledge and understanding', desc:'Demonstrate knowledge and understanding of content and concepts' },
+      { letter:'B', name:'Application and analysis', desc:'Apply knowledge and analyse; use evidence to support arguments' },
+      { letter:'C', name:'Synthesis and evaluation', desc:'Evaluate and synthesise different perspectives and sources' },
+      { letter:'D', name:'Communication', desc:'Communicate clearly using appropriate terminology and format' }
+    ]
+  },
+  CP: {
+    'default': [
+      { letter:'A', name:'Knowledge and understanding', desc:'Demonstrate knowledge and understanding of core content' },
+      { letter:'B', name:'Application', desc:'Apply skills and concepts to practical contexts' },
+      { letter:'C', name:'Reflection', desc:'Reflect on personal development and the impact of learning' }
+    ]
+  }
+};
+
+const ATL_DATA = [
+  {
+    id: 'thinking', name: 'Thinking Skills', icon: '💡', color: '#e05c2b',
+    skills: [
+      { level: 'SURFACE', label: 'Identify & explore', desc: 'Recognise ideas and try strategies' },
+      { level: 'DEEP',    label: 'Analyse & evaluate', desc: 'Develop arguments and connections' },
+      { level: 'TRANSFER',label: 'Create & adapt', desc: 'Apply thinking in new contexts' }
+    ]
+  },
+  {
+    id: 'communication', name: 'Communication Skills', icon: '💬', color: '#e07a00',
+    skills: [
+      { level: 'SURFACE', label: 'Share & present', desc: 'Communicate clearly' },
+      { level: 'DEEP',    label: 'Explain & support', desc: 'Adapt for audience and purpose' },
+      { level: 'TRANSFER',label: 'Influence & refine', desc: 'Communicate for impact' }
+    ]
+  },
+  {
+    id: 'social', name: 'Social (Collaboration) Skills', icon: '🤝', color: '#2e7d32',
+    skills: [
+      { level: 'SURFACE', label: 'Participate & listen', desc: 'Work in a group' },
+      { level: 'DEEP',    label: 'Cooperate & resolve', desc: 'Collaborate effectively' },
+      { level: 'TRANSFER',label: 'Lead & synthesise', desc: 'Facilitate teamwork' }
+    ]
+  },
+  {
+    id: 'selfmgmt', name: 'Self-Management Skills', icon: '🧭', color: '#1565c0',
+    skills: [
+      { level: 'SURFACE', label: 'Organise & plan', desc: 'Follow routines' },
+      { level: 'DEEP',    label: 'Persevere & adapt', desc: 'Set goals and manage time' },
+      { level: 'TRANSFER',label: 'Reflect & self-regulate', desc: 'Stay focused and resilient' }
+    ]
+  },
+  {
+    id: 'research', name: 'Research Skills', icon: '🔍', color: '#f5a623',
+    skills: [
+      { level: 'SURFACE', label: 'Find & record', desc: 'Locate and collect' },
+      { level: 'DEEP',    label: 'Evaluate & synthesise', desc: 'Assess sources critically' },
+      { level: 'TRANSFER',label: 'Inquire & cite', desc: 'Use information ethically' }
+    ]
+  }
+];
+
+const AI_LEVELS = [
+  { level: 0, name: 'No AI Use', desc: 'The assignment must be completed entirely without AI assistance. Students demonstrate independent thinking, knowledge and skills.', disclosure: 'No disclosure required. May require an academic integrity statement.' },
+  { level: 1, name: 'AI-Assisted Idea Generation, Structuring & Feedback', desc: 'AI may be used to brainstorm, outline, plan, or provide feedback to improve work, but no AI-generated content appears in the final submission.', disclosure: 'Submit a short statement explaining how AI was used. Include prompt(s) or screenshots.' },
+  { level: 2, name: 'AI-Assisted Editing', desc: 'AI is used to improve clarity, grammar, flow, or tone of student-created work. No new content can be created by AI.', disclosure: 'Submit a short statement explaining how AI was used. Include prompt(s) or tool(s) used.' },
+  { level: 3, name: 'AI Creation', desc: 'AI is used to complete parts of an assignment as defined by the teacher. Students are responsible for evaluating and editing AI output.', disclosure: 'MLA citation of all AI-generated content. Submit prompts/screenshots used.' },
+  { level: 4, name: 'Full AI Use with Human Oversight', desc: 'AI can support all stages of the task, but students remain responsible for editing, fact-checking, and ensuring originality. AI is a "co-pilot," not the author.', disclosure: 'MLA citations required. Disclose all AI use with prompts, tool names, and edits made.' }
+];
+
+// ============================================================
+// STATE
+// ============================================================
+
+let currentStep = 1;
+let form = {
+  programme: '',
+  subject: '',
+  grade: '',
+  dueDate: '',
+  homeroom: '',
+  unitTitle: '',
+  teacherName: '',
+  formOfAssessment: '',
+  taskDescription: '',
+  additionalInstructions: '',
+  selectedCriteria: [],
+  successCriteria: [],
+  selectedATLs: [],
+  aiLevel: null
+};
+
+let successCriteriaCount = 0;
+
+// ============================================================
+// NAVIGATION
+// ============================================================
+
+function goToStep(n) {
+  // Hide current
+  document.getElementById('panel-' + currentStep).classList.remove('active');
+  document.getElementById('step-nav-' + currentStep).classList.remove('active');
+
+  // Mark as completed if moving forward
+  if (n > currentStep) {
+    document.getElementById('step-nav-' + currentStep).classList.add('completed');
+    // Update step num to checkmark
+    document.querySelector('#step-nav-' + currentStep + ' .step-num').innerHTML = '✓';
+  }
+
+  currentStep = n;
+  document.getElementById('panel-' + n).classList.add('active');
+  document.getElementById('step-nav-' + n).classList.add('active');
+  document.getElementById('step-nav-' + n).classList.remove('completed');
+
+  if (n === 1 && form.programme) {
+    setTimeout(() => {
+      const el = document.getElementById('prog-' + form.programme);
+      if (el) el.classList.add('selected');
+    }, 0);
+  }
+  if (n === 2) buildSubjectGrid();
+  if (n === 4) buildCriteria();
+  if (n === 5) buildSuccessCriteria();
+  if (n === 6) { document.getElementById('atl-container').innerHTML = ''; document.getElementById('ai-cards').innerHTML = ''; buildATLs(); buildAICards(); }
+  if (n === 7) buildPreview();
+
+  window.scrollTo(0, 0);
+}
+
+// ============================================================
+// STEP 1: Programme
+// ============================================================
+
+function selectProgramme(p) {
+  form.programme = p;
+  form.subject = ''; // reset subject when programme changes
+  ['MYP','DP','CP'].forEach(x => {
+    const el = document.getElementById('prog-' + x);
+    if (el) el.classList.remove('selected');
+  });
+  const selected = document.getElementById('prog-' + p);
+  if (selected) selected.classList.add('selected');
+  document.getElementById('mini-programme').textContent = p + ' — ' + ({MYP:'Middle Years',DP:'Diploma',CP:'Career-related'}[p]);
+}
+
+// ============================================================
+// STEP 2: Subject Grid
+// ============================================================
+
+function buildSubjectGrid() {
+  const grid = document.getElementById('subject-grid');
+  const prog = form.programme || 'MYP';
+  const subjects = SUBJECTS[prog] || SUBJECTS.MYP;
+  grid.innerHTML = '';
+  subjects.forEach(s => {
+    const btn = document.createElement('button');
+    btn.className = 'subject-btn' + (form.subject === s ? ' selected' : '');
+    btn.textContent = s;
+    btn.onclick = () => selectSubject(s);
+    grid.appendChild(btn);
+  });
+  document.getElementById('custom-subject-wrap').style.display = 'none';
+}
+
+function selectSubject(s) {
+  form.subject = s;
+  document.querySelectorAll('.subject-btn').forEach(b => {
+    b.classList.toggle('selected', b.textContent === s);
+  });
+  document.getElementById('custom-subject-wrap').style.display = s === 'Other' ? 'flex' : 'none';
+  if (s !== 'Other') updateMini();
+}
+
+function updateMini() {
+  if (form.subject) {
+    document.getElementById('mini-subject').style.display = 'block';
+    document.getElementById('mini-subject-val').textContent = form.subject;
+  }
+  if (form.unitTitle) {
+    document.getElementById('mini-unit').style.display = 'block';
+    document.getElementById('mini-unit-val').textContent = form.unitTitle;
+  }
+}
+
+// ============================================================
+// STEP 4: Criteria
+// ============================================================
+
+function buildCriteria() {
+  const prog = form.programme || 'MYP';
+  const subj = form.subject || 'default';
+  const progData = CRITERIA_DATA[prog] || CRITERIA_DATA.MYP;
+  const criteria = progData[subj] || progData['default'];
+
+  const list = document.getElementById('criteria-list');
+  list.innerHTML = '';
+  criteria.forEach(c => {
+    const isSelected = form.selectedCriteria.some(x => x.letter === c.letter);
+    const item = document.createElement('div');
+    item.className = 'criteria-item' + (isSelected ? ' selected' : '');
+    item.id = 'crit-' + c.letter;
+    item.onclick = () => toggleCriteria(c);
+    item.innerHTML = `
+      <div class="criteria-checkbox">
+        <svg width="12" height="10" viewBox="0 0 12 10" fill="none">
+          <path d="M1 5l3.5 3.5L11 1" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <div>
+        <div class="criteria-name"><span class="criteria-letter">${c.letter}:</span> ${c.name}</div>
+        <div class="criteria-desc">${c.desc}</div>
+      </div>`;
+    list.appendChild(item);
+  });
+}
+
+function toggleCriteria(c) {
+  const idx = form.selectedCriteria.findIndex(x => x.letter === c.letter);
+  if (idx >= 0) {
+    form.selectedCriteria.splice(idx, 1);
+    document.getElementById('crit-' + c.letter).classList.remove('selected');
+  } else {
+    form.selectedCriteria.push(c);
+    document.getElementById('crit-' + c.letter).classList.add('selected');
+  }
+}
+
+// ============================================================
+// STEP 5: Success Criteria
+// ============================================================
+
+function buildSuccessCriteria() {
+  const list = document.getElementById('success-criteria-list');
+  if (list.children.length === 0 && form.successCriteria.length === 0) {
+    addSuccessCriterion();
+    addSuccessCriterion();
+  }
+}
+
+function addSuccessCriterion() {
+  const id = ++successCriteriaCount;
+  const list = document.getElementById('success-criteria-list');
+  const wrap = document.createElement('div');
+  wrap.style.cssText = 'display:flex;gap:10px;align-items:flex-start;margin-bottom:12px;';
+  wrap.id = 'sc-wrap-' + id;
+  wrap.innerHTML = `
+    <div style="padding-top:10px;color:var(--gess-green);font-weight:700;font-size:14px;min-width:20px;">${list.children.length + 1}.</div>
+    <textarea rows="2" style="flex:1;font-family:DM Sans,sans-serif;font-size:14px;border:1.5px solid var(--border);border-radius:8px;padding:10px 14px;resize:vertical;" 
+      placeholder="e.g. I have provided 2 real-life examples that show..." 
+      id="sc-${id}"
+      oninput="updateSuccessCriteria()"></textarea>
+    <button onclick="removeSuccessCriterion(${id})" style="margin-top:8px;background:none;border:none;cursor:pointer;color:#aaa;font-size:18px;" title="Remove">✕</button>`;
+  list.appendChild(wrap);
+}
+
+function removeSuccessCriterion(id) {
+  const el = document.getElementById('sc-wrap-' + id);
+  if (el) el.remove();
+  updateSuccessCriteria();
+}
+
+function updateSuccessCriteria() {
+  const list = document.getElementById('success-criteria-list');
+  form.successCriteria = [];
+  list.querySelectorAll('textarea').forEach(ta => {
+    if (ta.value.trim()) form.successCriteria.push(ta.value.trim());
+  });
+}
+
+// ============================================================
+// STEP 6: ATLs
+// ============================================================
+
+function buildATLs() {
+  const container = document.getElementById('atl-container');
+  if (container.innerHTML) return; // already built
+  container.innerHTML = '';
+
+  ATL_DATA.forEach(cat => {
+    const div = document.createElement('div');
+    div.className = 'atl-category';
+    div.innerHTML = `
+      <div class="atl-cat-header" onclick="toggleATLCat('${cat.id}')">
+        <div class="atl-cat-icon" style="background:${cat.color}20">${cat.icon}</div>
+        <div class="atl-cat-name">${cat.name}</div>
+        <div class="atl-cat-count hidden" id="atl-count-${cat.id}">0 selected</div>
+        <div class="atl-cat-toggle" id="atl-toggle-${cat.id}">›</div>
+      </div>
+      <div class="atl-skills" id="atl-skills-${cat.id}">
+        <div class="atl-skill-grid">
+          ${cat.skills.map(s => `
+            <button class="atl-skill-btn" id="atl-${cat.id}-${s.label.replace(/\s+/g,'_')}"
+              onclick="toggleATL('${cat.id}','${s.level}','${s.label}','${s.desc}','${cat.name}')">
+              <span class="atl-level atl-level-${s.level.toLowerCase()}">${s.level}</span>
+              ${s.label}
+            </button>`).join('')}
+        </div>
+      </div>`;
+    container.appendChild(div);
+  });
+
+  // Restore selections
+  form.selectedATLs.forEach(a => {
+    const btn = document.getElementById('atl-' + a.catId + '-' + a.label.replace(/\s+/g,'_'));
+    if (btn) btn.classList.add('selected');
+  });
+}
+
+function toggleATLCat(id) {
+  const skills = document.getElementById('atl-skills-' + id);
+  const toggle = document.getElementById('atl-toggle-' + id);
+  skills.classList.toggle('open');
+  toggle.classList.toggle('open');
+}
+
+function toggleATL(catId, level, label, desc, catName) {
+  const key = catId + '-' + label;
+  const idx = form.selectedATLs.findIndex(a => a.key === key);
+  const btn = document.getElementById('atl-' + catId + '-' + label.replace(/\s+/g,'_'));
+  if (idx >= 0) {
+    form.selectedATLs.splice(idx, 1);
+    if (btn) btn.classList.remove('selected');
+  } else {
+    form.selectedATLs.push({ key, catId, catName, level, label, desc });
+    if (btn) btn.classList.add('selected');
+  }
+  // Update count
+  const count = form.selectedATLs.filter(a => a.catId === catId).length;
+  const countEl = document.getElementById('atl-count-' + catId);
+  if (count > 0) {
+    countEl.textContent = count + ' selected';
+    countEl.classList.remove('hidden');
+  } else {
+    countEl.classList.add('hidden');
+  }
+}
+
+function buildAICards() {
+  const container = document.getElementById('ai-cards');
+  if (container.innerHTML) return;
+  container.innerHTML = '';
+  AI_LEVELS.forEach(a => {
+    const div = document.createElement('div');
+    div.className = 'ai-card' + (form.aiLevel === a.level ? ' selected' : '');
+    div.id = 'ai-card-' + a.level;
+    div.onclick = () => selectAILevel(a.level);
+    div.innerHTML = `
+      <div class="ai-level-num ai-level-${a.level}">${a.level}</div>
+      <div class="ai-card-content">
+        <div class="ai-card-name">${a.name}</div>
+        <div class="ai-card-desc">${a.desc}</div>
+        <div class="ai-disclosure">📋 Disclosure: ${a.disclosure}</div>
+      </div>`;
+    container.appendChild(div);
+  });
+}
+
+function selectAILevel(level) {
+  form.aiLevel = level;
+  document.querySelectorAll('.ai-card').forEach(c => c.classList.remove('selected'));
+  document.getElementById('ai-card-' + level).classList.add('selected');
+}
+
+// ============================================================
+// STEP 7: Preview
+// ============================================================
+
+function buildPreview() {
+  updateSuccessCriteria();
+  const p = form;
+  const aiInfo = AI_LEVELS.find(a => a.level === p.aiLevel);
+  const criteriaLetters = p.selectedCriteria.map(c => c.letter).join(', ');
+
+  let critObjectivesHTML = '';
+  p.selectedCriteria.forEach(c => {
+    critObjectivesHTML += `<tr><td class="field-label">Criterion ${c.letter}: ${c.name}</td><td>${c.desc}</td></tr>`;
+  });
+
+  let successHTML = '';
+  p.successCriteria.forEach((sc, i) => {
+    successHTML += `<tr><td colspan="2" style="padding:6px 12px;">• ${sc}</td></tr>`;
+  });
+
+  let atlHTML = '';
+  if (p.selectedATLs.length > 0) {
+    atlHTML = p.selectedATLs.map(a =>
+      `<span class="tag tag-atl">${a.catName}: ${a.label} (${a.level})</span>`
+    ).join('');
+  } else {
+    atlHTML = '<em style="color:var(--text-muted);font-size:12px;">No ATLs selected</em>';
+  }
+
+  const aiHTML = aiInfo
+    ? `<span class="tag tag-ai">Level ${aiInfo.level} — ${aiInfo.name}</span>`
+    : '<em style="color:var(--text-muted);font-size:12px;">No AI level selected</em>';
+
+  document.getElementById('preview-content').innerHTML = `
+    <div class="preview-card">
+      <div class="preview-header">
+        <div class="preview-gess">GESS</div>
+        <div class="preview-doc-title">Assessment Task Clarifications</div>
+      </div>
+
+      <table class="preview-table">
+        <tr>
+          <td class="field-label">Student name</td><td></td>
+          <td class="field-label">Homeroom</td><td>${p.homeroom || ''}</td>
+        </tr>
+        <tr>
+          <td class="field-label">Subject</td><td>${p.subject || ''}</td>
+          <td class="field-label">Due Date</td><td>${p.dueDate ? new Date(p.dueDate).toLocaleDateString('en-GB',{day:'2-digit',month:'long',year:'numeric'}) : ''}</td>
+        </tr>
+        <tr>
+          <td class="field-label">Unit Title</td><td>${p.unitTitle || ''}</td>
+          <td class="field-label">Criteria Being Assessed</td><td>${criteriaLetters}</td>
+        </tr>
+        <tr>
+          <td class="field-label">Programme</td><td>${p.programme || ''}</td>
+          <td class="field-label">Grade / Year</td><td>${p.grade || ''}</td>
+        </tr>
+      </table>
+
+      ${critObjectivesHTML ? `
+      <table class="preview-table">
+        <tr class="span-row"><td colspan="2">Subject Objectives Being Assessed</td></tr>
+        ${critObjectivesHTML}
+      </table>` : ''}
+
+      <table class="preview-table">
+        <tr class="span-row"><td colspan="2">Form of Assessment</td></tr>
+        <tr><td colspan="2" style="padding:10px 12px;">${p.formOfAssessment || ''}</td></tr>
+        <tr><td colspan="2" style="padding:10px 12px; white-space:pre-wrap;">${p.taskDescription || ''}</td></tr>
+        ${p.additionalInstructions ? `<tr><td colspan="2" style="padding:10px 12px; color:var(--text-muted);">${p.additionalInstructions}</td></tr>` : ''}
+      </table>
+
+      ${p.successCriteria.length > 0 ? `
+      <table class="preview-table">
+        <tr class="span-row"><td colspan="2">Success Criteria</td></tr>
+        ${successHTML}
+      </table>` : ''}
+
+      <table class="preview-table">
+        <tr class="span-row"><td colspan="2">Approaches to Learning (ATL) Skills</td></tr>
+        <tr><td colspan="2" style="padding:10px 12px;"><div class="tag-row">${atlHTML}</div></td></tr>
+      </table>
+
+      <table class="preview-table">
+        <tr class="span-row"><td colspan="2">AI Acceptable Use Level</td></tr>
+        <tr>
+          <td colspan="2" style="padding:10px 12px;">
+            <div class="tag-row">${aiHTML}</div>
+            ${aiInfo ? `<div style="font-size:12px;color:var(--text-muted);margin-top:8px;">${aiInfo.desc}</div>
+            <div style="font-size:11px;color:var(--gess-green);margin-top:4px;font-style:italic;">📋 ${aiInfo.disclosure}</div>` : ''}
+          </td>
+        </tr>
+      </table>
+
+      <table class="preview-table" style="margin-top:8px;">
+        <tr>
+          <td class="field-label">Student signature</td>
+          <td style="font-style:italic;font-size:12px;color:var(--text-muted);">I have read and understood what is required of me in this task<br><br>_______________________________</td>
+          <td class="field-label">Date</td>
+          <td></td>
+        </tr>
+      </table>
+    </div>`;
+}
+
+// ============================================================
+// DOCX GENERATION
+// ============================================================
+
+async function generateDocx() {
+  updateSuccessCriteria();
+  const { Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell,
+          WidthType, BorderStyle, ShadingType, AlignmentType, VerticalAlign,
+          HeadingLevel, LevelFormat } = docx;
+
+  const GESS_GREEN = '1A6B3A';
+  const GESS_PALE = 'E8F4ED';
+  const WHITE = 'FFFFFF';
+  const LIGHT_GREY = 'F5F5F5';
+
+  const p = form;
+  const aiInfo = AI_LEVELS.find(a => a.level === p.aiLevel);
+  const criteriaLetters = p.selectedCriteria.map(c => c.letter).join(', ');
+
+  const border = { style: BorderStyle.SINGLE, size: 4, color: 'CCCCCC' };
+  const borders = { top: border, bottom: border, left: border, right: border };
+  const greenBorder = { style: BorderStyle.SINGLE, size: 4, color: GESS_GREEN };
+  const greenBorders = { top: greenBorder, bottom: greenBorder, left: greenBorder, right: greenBorder };
+
+  const cell = (text, opts = {}) => new TableCell({
+    borders: opts.borders || borders,
+    width: opts.width ? { size: opts.width, type: WidthType.DXA } : undefined,
+    shading: { fill: opts.fill || WHITE, type: ShadingType.CLEAR },
+    margins: { top: 80, bottom: 80, left: 120, right: 120 },
+    columnSpan: opts.span || 1,
+    verticalAlign: VerticalAlign.CENTER,
+    children: [new Paragraph({
+      children: [new TextRun({
+        text: String(text || ''),
+        bold: opts.bold || false,
+        color: opts.color || '000000',
+        size: opts.fontSize || 20,
+        font: 'Calibri'
+      })],
+      alignment: opts.align || AlignmentType.LEFT
+    })]
+  });
+
+  const labelCell = (text, width) => cell(text, { fill: GESS_PALE, bold: true, color: GESS_GREEN, width, fontSize: 19 });
+  const headerRow = (text, cols) => new TableRow({
+    children: [new TableCell({
+      borders: greenBorders,
+      columnSpan: cols,
+      shading: { fill: GESS_GREEN, type: ShadingType.CLEAR },
+      margins: { top: 80, bottom: 80, left: 120, right: 120 },
+      children: [new Paragraph({
+        children: [new TextRun({ text, bold: true, color: WHITE, size: 20, font: 'Calibri' })]
+      })]
+    })]
+  });
+
+  const TW = 9360; // total table width (A4, 1" margins)
+
+  // Helper for multi-line cell
+  const multiCell = (lines, opts = {}) => new TableCell({
+    borders: opts.borders || borders,
+    width: opts.width ? { size: opts.width, type: WidthType.DXA } : undefined,
+    shading: { fill: opts.fill || WHITE, type: ShadingType.CLEAR },
+    margins: { top: 80, bottom: 80, left: 120, right: 120 },
+    columnSpan: opts.span || 1,
+    children: lines.map((line, i) => new Paragraph({
+      numbering: opts.bullet ? { reference: 'bullets', level: 0 } : undefined,
+      children: [new TextRun({ text: line, bold: line.startsWith('I have') || false, size: opts.fontSize || 20, font: 'Calibri', color: opts.color || '000000' })]
+    }))
+  });
+
+  const rows = [];
+
+  // Title row
+  rows.push(new TableRow({
+    children: [
+      new TableCell({
+        borders: greenBorders,
+        columnSpan: 4,
+        shading: { fill: GESS_GREEN, type: ShadingType.CLEAR },
+        margins: { top: 120, bottom: 120, left: 160, right: 160 },
+        children: [new Paragraph({
+          alignment: AlignmentType.CENTER,
+          children: [new TextRun({ text: 'GESS Assessment Task Clarifications', bold: true, color: WHITE, size: 26, font: 'Calibri' })]
+        })]
+      })
+    ]
+  }));
+
+  // Student name / Homeroom
+  rows.push(new TableRow({ children: [
+    labelCell('Student name', 2100),
+    cell('', { width: 2600 }),
+    labelCell('Homeroom', 1800),
+    cell(p.homeroom || '', { width: 2860 })
+  ]}));
+
+  // Subject / Due Date
+  const dueDateStr = p.dueDate ? new Date(p.dueDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' }) : '';
+  rows.push(new TableRow({ children: [
+    labelCell('Subject', 2100),
+    cell(p.subject || '', { width: 2600 }),
+    labelCell('Due Date', 1800),
+    cell(dueDateStr, { width: 2860 })
+  ]}));
+
+  // Unit Title / Criteria
+  rows.push(new TableRow({ children: [
+    labelCell('Unit Title', 2100),
+    cell(p.unitTitle || '', { width: 2600 }),
+    labelCell('Criteria Being Assessed', 1800),
+    cell(criteriaLetters, { width: 2860 })
+  ]}));
+
+  // Programme / Grade
+  rows.push(new TableRow({ children: [
+    labelCell('Programme', 2100),
+    cell(p.programme || '', { width: 2600 }),
+    labelCell('Grade / Year', 1800),
+    cell(p.grade || '', { width: 2860 })
+  ]}));
+
+  // Objectives section
+  if (p.selectedCriteria.length > 0) {
+    rows.push(headerRow('Subject Objectives Being Assessed', 4));
+    p.selectedCriteria.forEach(c => {
+      rows.push(new TableRow({ children: [
+        labelCell(`Criterion ${c.letter}: ${c.name}`, 2500),
+        new TableCell({
+          borders,
+          columnSpan: 3,
+          shading: { fill: WHITE, type: ShadingType.CLEAR },
+          margins: { top: 80, bottom: 80, left: 120, right: 120 },
+          width: { size: 6860, type: WidthType.DXA },
+          children: [new Paragraph({ children: [new TextRun({ text: c.desc, size: 20, font: 'Calibri' })] })]
+        })
+      ]}));
+    });
+  }
+
+  // Form of Assessment
+  rows.push(headerRow('Form of Assessment', 4));
+  rows.push(new TableRow({ children: [
+    new TableCell({
+      borders, columnSpan: 4,
+      shading: { fill: WHITE, type: ShadingType.CLEAR },
+      margins: { top: 100, bottom: 100, left: 120, right: 120 },
+      width: { size: TW, type: WidthType.DXA },
+      children: [
+        new Paragraph({ children: [new TextRun({ text: p.formOfAssessment || '', bold: true, size: 22, font: 'Calibri' })] }),
+        ...(p.taskDescription ? [new Paragraph({ children: [new TextRun({ text: '', size: 18, font: 'Calibri' })] }),
+          new Paragraph({ children: [new TextRun({ text: p.taskDescription, size: 20, font: 'Calibri' })] })] : []),
+        ...(p.additionalInstructions ? [new Paragraph({ children: [new TextRun({ text: '', size: 18, font: 'Calibri' })] }),
+          new Paragraph({ children: [new TextRun({ text: p.additionalInstructions, size: 18, font: 'Calibri', color: '666666' })] })] : [])
+      ]
+    })
+  ]}));
+
+  // Success Criteria
+  if (p.successCriteria.length > 0) {
+    rows.push(headerRow('Success Criteria (Task-specific clarifications)', 4));
+    rows.push(new TableRow({ children: [
+      new TableCell({
+        borders, columnSpan: 4,
+        shading: { fill: WHITE, type: ShadingType.CLEAR },
+        margins: { top: 100, bottom: 100, left: 160, right: 120 },
+        width: { size: TW, type: WidthType.DXA },
+        children: p.successCriteria.map(sc => new Paragraph({
+          numbering: { reference: 'bullets', level: 0 },
+          children: [new TextRun({ text: sc, bold: true, size: 20, font: 'Calibri' })]
+        }))
+      })
+    ]}));
+  }
+
+  // ATLs
+  rows.push(headerRow('Approaches to Learning (ATL) Skills', 4));
+  const atlText = p.selectedATLs.length > 0
+    ? p.selectedATLs.map(a => `${a.catName}: ${a.label} [${a.level}]`).join('  |  ')
+    : 'Not specified';
+  rows.push(new TableRow({ children: [
+    new TableCell({
+      borders, columnSpan: 4,
+      shading: { fill: WHITE, type: ShadingType.CLEAR },
+      margins: { top: 100, bottom: 100, left: 120, right: 120 },
+      width: { size: TW, type: WidthType.DXA },
+      children: [new Paragraph({ children: [new TextRun({ text: atlText, size: 20, font: 'Calibri' })] })]
+    })
+  ]}));
+
+  // AI Level
+  rows.push(headerRow('AI Acceptable Use Level (GESS Scale)', 4));
+  rows.push(new TableRow({ children: [
+    new TableCell({
+      borders, columnSpan: 1,
+      shading: { fill: GESS_PALE, type: ShadingType.CLEAR },
+      margins: { top: 100, bottom: 100, left: 120, right: 120 },
+      width: { size: 1500, type: WidthType.DXA },
+      children: [
+        new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: aiInfo ? `Level ${aiInfo.level}`, bold: true, size: 28, color: GESS_GREEN, font: 'Calibri' })] })
+      ]
+    }),
+    new TableCell({
+      borders, columnSpan: 3,
+      shading: { fill: WHITE, type: ShadingType.CLEAR },
+      margins: { top: 100, bottom: 100, left: 120, right: 120 },
+      width: { size: 7860, type: WidthType.DXA },
+      children: [
+        new Paragraph({ children: [new TextRun({ text: aiInfo ? aiInfo.name : 'Not set', bold: true, size: 20, font: 'Calibri' })] }),
+        new Paragraph({ children: [new TextRun({ text: aiInfo ? aiInfo.desc : '', size: 18, font: 'Calibri', color: '444444' })] }),
+        new Paragraph({ children: [new TextRun({ text: aiInfo ? `Disclosure required: ${aiInfo.disclosure}` : '', size: 18, font: 'Calibri', color: GESS_GREEN, italics: true })] })
+      ]
+    })
+  ]}));
+
+  // Student Signature
+  rows.push(new TableRow({ children: [
+    labelCell('Student signature', 2100),
+    new TableCell({
+      borders,
+      columnSpan: 2,
+      shading: { fill: WHITE, type: ShadingType.CLEAR },
+      margins: { top: 100, bottom: 100, left: 120, right: 120 },
+      width: { size: 5260, type: WidthType.DXA },
+      children: [
+        new Paragraph({ children: [new TextRun({ text: 'I have read and understood what is required of me in this task', size: 18, font: 'Calibri', italics: true, color: '555555' })] }),
+        new Paragraph({ children: [new TextRun({ text: '', size: 18 })] }),
+        new Paragraph({ children: [new TextRun({ text: '___________________________________', size: 18, font: 'Calibri' })] })
+      ]
+    }),
+    labelCell('Date', 1800),
+    cell('', { width: 1200 })
+  ]}));
+
+  const mainTable = new Table({
+    width: { size: TW, type: WidthType.DXA },
+    columnWidths: [2100, 2600, 1800, 2860],
+    rows
+  });
+
+  const doc = new Document({
+    numbering: {
+      config: [{
+        reference: 'bullets',
+        levels: [{ level: 0, format: LevelFormat.BULLET, text: '•', alignment: AlignmentType.LEFT,
+          style: { paragraph: { indent: { left: 720, hanging: 360 } } } }]
+      }]
+    },
+    sections: [{
+      properties: {
+        page: {
+          size: { width: 11906, height: 16838 },
+          margin: { top: 1000, right: 1000, bottom: 1000, left: 1000 }
+        }
+      },
+      children: [
+        mainTable,
+        new Paragraph({ children: [new TextRun({ text: '', size: 18 })] }),
+        ...(p.selectedCriteria.length > 0 ? buildRubricTables(p, Document, Paragraph, TextRun, Table, TableRow, TableCell, WidthType, BorderStyle, ShadingType, AlignmentType, VerticalAlign, GESS_GREEN, GESS_PALE, WHITE, TW) : [])
+      ]
+    }]
+  });
+
+  const buffer = await Packer.toBlob(doc);
+  const url = URL.createObjectURL(buffer);
+  const a = document.createElement('a');
+  a.href = url;
+  const subjectSlug = (p.subject || 'assessment').replace(/\s+/g, '_').toLowerCase();
+  const unitSlug = (p.unitTitle || 'task').replace(/\s+/g, '_').toLowerCase().slice(0, 20);
+  a.download = `GESS_${p.programme || 'IB'}_${subjectSlug}_${unitSlug}.docx`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function buildRubricTables(p, Document, Paragraph, TextRun, Table, TableRow, TableCell, WidthType, BorderStyle, ShadingType, AlignmentType, VerticalAlign, GESS_GREEN, GESS_PALE, WHITE, TW) {
+  const elements = [];
+  const border = { style: BorderStyle.SINGLE, size: 4, color: 'CCCCCC' };
+  const borders = { top: border, bottom: border, left: border, right: border };
+  const greenBorder = { style: BorderStyle.SINGLE, size: 4, color: GESS_GREEN };
+  const greenBorders = { top: greenBorder, bottom: greenBorder, left: greenBorder, right: greenBorder };
+
+  const BAND_LABELS = ['0', '1–2', '3–4', '5–6', '7–8'];
+  const BAND_DESCS = {
+    '0': 'The student does not reach a standard described by any of the descriptors below.',
+    '1–2': 'The student demonstrates limited knowledge and understanding with minimal description and/or examples.',
+    '3–4': 'The student demonstrates adequate knowledge and understanding with satisfactory descriptions, explanations and examples.',
+    '5–6': 'The student demonstrates substantial knowledge and understanding with accurate descriptions, explanations and examples.',
+    '7–8': 'The student demonstrates excellent knowledge and understanding with thorough, accurate descriptions, explanations and examples.'
+  };
+
+  p.selectedCriteria.forEach(c => {
+    elements.push(new Paragraph({ children: [new TextRun({ text: '', size: 20 })] }));
+
+    const rubricRows = [];
+    // Header
+    rubricRows.push(new TableRow({
+      children: [new TableCell({
+        borders: greenBorders,
+        columnSpan: 2,
+        shading: { fill: GESS_GREEN, type: ShadingType.CLEAR },
+        margins: { top: 80, bottom: 80, left: 120, right: 120 },
+        children: [new Paragraph({ children: [new TextRun({ text: `Criterion ${c.letter}: ${c.name}  |  Maximum: 8`, bold: true, color: WHITE, size: 22, font: 'Calibri' })] })]
+      })]
+    }));
+
+    // Column headers
+    rubricRows.push(new TableRow({
+      children: [
+        new TableCell({
+          borders, width: { size: 1400, type: WidthType.DXA },
+          shading: { fill: GESS_PALE, type: ShadingType.CLEAR },
+          margins: { top: 80, bottom: 80, left: 120, right: 120 },
+          children: [new Paragraph({ children: [new TextRun({ text: 'Achievement Level', bold: true, size: 19, font: 'Calibri', color: GESS_GREEN })] })]
+        }),
+        new TableCell({
+          borders, width: { size: 7960, type: WidthType.DXA },
+          shading: { fill: GESS_PALE, type: ShadingType.CLEAR },
+          margins: { top: 80, bottom: 80, left: 120, right: 120 },
+          children: [new Paragraph({ children: [new TextRun({ text: 'Level Descriptor', bold: true, size: 19, font: 'Calibri', color: GESS_GREEN })] })]
+        })
+      ]
+    }));
+
+    BAND_LABELS.forEach(band => {
+      rubricRows.push(new TableRow({
+        children: [
+          new TableCell({
+            borders, width: { size: 1400, type: WidthType.DXA },
+            shading: { fill: band === '0' ? 'F9F9F9' : WHITE, type: ShadingType.CLEAR },
+            margins: { top: 80, bottom: 80, left: 120, right: 120 },
+            verticalAlign: VerticalAlign.CENTER,
+            children: [new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: band, bold: true, size: 20, font: 'Calibri' })] })]
+          }),
+          new TableCell({
+            borders, width: { size: 7960, type: WidthType.DXA },
+            shading: { fill: WHITE, type: ShadingType.CLEAR },
+            margins: { top: 80, bottom: 80, left: 120, right: 120 },
+            children: [new Paragraph({ children: [new TextRun({ text: BAND_DESCS[band] || '', size: 19, font: 'Calibri' })] })]
+          })
+        ]
+      }));
+    });
+
+    elements.push(new Table({
+      width: { size: TW, type: WidthType.DXA },
+      columnWidths: [1400, 7960],
+      rows: rubricRows
+    }));
+  });
+
+  return elements;
+}
+
+// ============================================================
+// INIT
+// ============================================================
+
+// Build happens when navigating to step 2, not on load
+window.addEventListener('load', () => {
+  // Nothing needed on load - state initialises fresh
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>JS Test</title>
+<style>
+  body { font-family: sans-serif; padding: 40px; }
+  .btn {
+    padding: 20px 40px;
+    font-size: 20px;
+    background: #1A6B3A;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    display: block;
+    margin: 20px 0;
+  }
+  .btn.selected { background: red; }
+  #result {
+    margin-top: 20px;
+    padding: 20px;
+    background: #eee;
+    border-radius: 8px;
+    font-size: 16px;
+  }
+</style>
+</head>
+<body>
+
+<h2>JavaScript Click Test</h2>
+<p>Click the button below. If it turns red and shows a message, JS is working.</p>
+
+<button class="btn" id="testBtn">Click Me</button>
+<div id="result">Nothing clicked yet.</div>
+
+<script>
+  var clicked = false;
+
+  document.getElementById('testBtn').addEventListener('click', function() {
+    clicked = true;
+    this.classList.add('selected');
+    this.textContent = 'Clicked!';
+    document.getElementById('result').textContent = 'SUCCESS — JavaScript is working! Clicked at: ' + new Date().toLocaleTimeString();
+  });
+</script>
+</body>
+</html>

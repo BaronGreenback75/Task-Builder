@@ -23883,15 +23883,15 @@ var __async = (__this, __arguments, generator) => {
       </div>
 
       <div class="programme-cards">
-        <button class="prog-card" id="prog-MYP">
+        <button class="prog-card" id="prog-MYP" onclick="selectProgramme('MYP')">
           <div class="prog-abbr">MYP</div>
           <div class="prog-name">Middle Years<br>Programme</div>
         </button>
-        <button class="prog-card" id="prog-DP">
+        <button class="prog-card" id="prog-DP" onclick="selectProgramme('DP')">
           <div class="prog-abbr">DP</div>
           <div class="prog-name">Diploma<br>Programme</div>
         </button>
-        <button class="prog-card" id="prog-CP">
+        <button class="prog-card" id="prog-CP" onclick="selectProgramme('CP')">
           <div class="prog-abbr">CP</div>
           <div class="prog-name">Career-related<br>Programme</div>
         </button>
@@ -25790,12 +25790,7 @@ function getRubricBands(c, selectedNums) {
 // ============================================================
 
 // Build happens when navigating to step 2, not on load
-window.addEventListener('load', () => {
-  // Wire up programme cards via addEventListener (more reliable than inline onclick)
-  document.getElementById('prog-MYP').addEventListener('click', () => selectProgramme('MYP'));
-  document.getElementById('prog-DP').addEventListener('click',  () => selectProgramme('DP'));
-  document.getElementById('prog-CP').addEventListener('click',  () => selectProgramme('CP'));
-});
+// Programme buttons wired via inline onclick in HTML
 </script>
 </body>
 </html>

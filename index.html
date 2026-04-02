@@ -5,9 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GESS Assessment Task Sheet Builder</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/docx@7.1.0/build/index.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/docx/7.8.2/docx.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
     <style>
+        :root {
+            --gess-green: #00A651;
+            --gess-dark-green: #008C44;
+            --gess-light-green: #E8F5E9;
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -16,7 +22,7 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, var(--gess-green) 0%, var(--gess-dark-green) 100%);
             min-height: 100vh;
             padding: 20px;
         }
@@ -31,7 +37,7 @@
         }
 
         .header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, var(--gess-green) 0%, var(--gess-dark-green) 100%);
             color: white;
             padding: 30px;
             text-align: center;
@@ -78,7 +84,7 @@
         }
 
         .progress-step.active::before {
-            background: #667eea;
+            background: var(--gess-green);
         }
 
         .step-number {
@@ -96,12 +102,12 @@
         }
 
         .progress-step.active .step-number {
-            background: #667eea;
+            background: var(--gess-green);
             color: white;
         }
 
         .progress-step.completed .step-number {
-            background: #28a745;
+            background: var(--gess-green);
             color: white;
         }
 
@@ -166,7 +172,7 @@
         select:focus,
         textarea:focus {
             outline: none;
-            border-color: #667eea;
+            border-color: var(--gess-green);
         }
 
         textarea {
@@ -192,19 +198,19 @@
         }
 
         .programme-btn:hover {
-            border-color: #667eea;
+            border-color: var(--gess-green);
             transform: translateY(-5px);
-            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.2);
+            box-shadow: 0 10px 20px rgba(0, 166, 81, 0.2);
         }
 
         .programme-btn.selected {
-            border-color: #667eea;
-            background: #f0f3ff;
+            border-color: var(--gess-green);
+            background: var(--gess-light-green);
         }
 
         .programme-btn i {
             font-size: 40px;
-            color: #667eea;
+            color: var(--gess-green);
             margin-bottom: 15px;
             display: block;
         }
@@ -224,7 +230,7 @@
 
         .checkbox-item {
             display: flex;
-            align-items: center;
+            align-items: flex-start;
             padding: 10px;
             border: 2px solid #e9ecef;
             border-radius: 8px;
@@ -234,14 +240,43 @@
 
         .checkbox-item:hover {
             background: #f8f9fa;
-            border-color: #667eea;
+            border-color: var(--gess-green);
         }
 
         .checkbox-item input[type="checkbox"] {
             margin-right: 10px;
+            margin-top: 3px;
             width: 18px;
             height: 18px;
             cursor: pointer;
+            flex-shrink: 0;
+        }
+
+        .checkbox-item label {
+            margin: 0;
+            cursor: pointer;
+            flex-grow: 1;
+        }
+
+        .strand-selection {
+            margin-left: 30px;
+            margin-top: 10px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .strand-checkbox {
+            display: flex;
+            align-items: center;
+            padding: 5px 10px;
+            background: var(--gess-light-green);
+            border-radius: 5px;
+            font-size: 13px;
+        }
+
+        .strand-checkbox input {
+            margin-right: 5px;
         }
 
         .navigation {
@@ -263,14 +298,14 @@
         }
 
         .btn-primary {
-            background: #667eea;
+            background: var(--gess-green);
             color: white;
         }
 
         .btn-primary:hover {
-            background: #5568d3;
+            background: var(--gess-dark-green);
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+            box-shadow: 0 5px 15px rgba(0, 166, 81, 0.3);
         }
 
         .btn-secondary {
@@ -321,13 +356,13 @@
         }
 
         .ai-level-btn:hover {
-            border-color: #667eea;
+            border-color: var(--gess-green);
             transform: translateY(-2px);
         }
 
         .ai-level-btn.selected {
-            border-color: #667eea;
-            background: #f0f3ff;
+            border-color: var(--gess-green);
+            background: var(--gess-light-green);
         }
 
         .ai-level-btn strong {
@@ -349,7 +384,7 @@
 
         .success-message i {
             font-size: 80px;
-            color: #28a745;
+            color: var(--gess-green);
             margin-bottom: 20px;
         }
 
@@ -361,6 +396,32 @@
         .success-message p {
             color: #6c757d;
             margin-bottom: 30px;
+        }
+
+        .criterion-container {
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+
+        .criterion-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .criterion-header input[type="checkbox"] {
+            margin-right: 10px;
+            width: 20px;
+            height: 20px;
+        }
+
+        .criterion-header label {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--gess-green);
+            margin: 0;
         }
     </style>
 </head>
@@ -437,7 +498,9 @@
                 </div>
                 <div class="form-group">
                     <label for="grade">Grade/Year</label>
-                    <input type="text" id="grade" placeholder="e.g., MYP 3, DP 1" required>
+                    <select id="grade" required>
+                        <option value="">Select grade...</option>
+                    </select>
                 </div>
                 <div class="form-group">
                     <label for="dueDate">Due Date</label>
@@ -447,407 +510,3 @@
                     <label for="homeroom">Homeroom</label>
                     <input type="text" id="homeroom" placeholder="e.g., 9A" required>
                 </div>
-                <div class="form-group">
-                    <label for="unitTitle">Unit Title</label>
-                    <input type="text" id="unitTitle" placeholder="Enter unit title" required>
-                </div>
-                <div class="form-group">
-                    <label for="teacher">Teacher Name</label>
-                    <input type="text" id="teacher" placeholder="Enter teacher name" required>
-                </div>
-            </div>
-
-            <!-- Step 3: Task Information -->
-            <div class="step" id="step3">
-                <h2>Task Information</h2>
-                <div class="form-group">
-                    <label for="assessmentForm">Form of Assessment</label>
-                    <input type="text" id="assessmentForm" placeholder="e.g., Written assignment, Presentation" required>
-                </div>
-                <div class="form-group">
-                    <label for="taskDescription">Task Description</label>
-                    <textarea id="taskDescription" placeholder="Describe the assessment task..." required></textarea>
-                </div>
-                <div class="form-group">
-                    <label for="statementOfInquiry">Statement of Inquiry</label>
-                    <textarea id="statementOfInquiry" placeholder="Enter the statement of inquiry..."></textarea>
-                </div>
-                <div class="form-group">
-                    <label for="keyConcepts">Key Concepts</label>
-                    <input type="text" id="keyConcepts" placeholder="e.g., Change, Systems">
-                </div>
-                <div class="form-group">
-                    <label for="globalContext">Global Context</label>
-                    <input type="text" id="globalContext" placeholder="e.g., Identities and relationships">
-                </div>
-            </div>
-
-            <!-- Step 4: Criteria Selection -->
-            <div class="step" id="step4">
-                <h2>Select Assessment Criteria</h2>
-                <div class="checkbox-group" id="criteriaList">
-                    <!-- Criteria will be populated dynamically -->
-                </div>
-            </div>
-
-            <!-- Step 5: Success Criteria -->
-            <div class="step" id="step5">
-                <h2>Success Criteria</h2>
-                <p style="margin-bottom: 20px; color: #6c757d;">Define what students need to demonstrate for each criterion level.</p>
-                <div id="successCriteriaContainer">
-                    <!-- Success criteria inputs will be generated dynamically -->
-                </div>
-            </div>
-
-            <!-- Step 6: ATL Skills and AI Level -->
-            <div class="step" id="step6">
-                <h2>ATL Skills & AI Acceptable Use</h2>
-                <div class="form-group">
-                    <label>Select ATL Skills (Approaches to Learning)</label>
-                    <div class="checkbox-group" id="atlSkills">
-                        <div class="checkbox-item">
-                            <input type="checkbox" id="atl1" value="Communication">
-                            <label for="atl1">Communication Skills</label>
-                        </div>
-                        <div class="checkbox-item">
-                            <input type="checkbox" id="atl2" value="Collaboration">
-                            <label for="atl2">Collaboration Skills</label>
-                        </div>
-                        <div class="checkbox-item">
-                            <input type="checkbox" id="atl3" value="Organization">
-                            <label for="atl3">Organization Skills</label>
-                        </div>
-                        <div class="checkbox-item">
-                            <input type="checkbox" id="atl4" value="Affective">
-                            <label for="atl4">Affective Skills</label>
-                        </div>
-                        <div class="checkbox-item">
-                            <input type="checkbox" id="atl5" value="Reflection">
-                            <label for="atl5">Reflection Skills</label>
-                        </div>
-                        <div class="checkbox-item">
-                            <input type="checkbox" id="atl6" value="Information">
-                            <label for="atl6">Information Literacy Skills</label>
-                        </div>
-                        <div class="checkbox-item">
-                            <input type="checkbox" id="atl7" value="Media">
-                            <label for="atl7">Media Literacy Skills</label>
-                        </div>
-                        <div class="checkbox-item">
-                            <input type="checkbox" id="atl8" value="Critical">
-                            <label for="atl8">Critical Thinking Skills</label>
-                        </div>
-                        <div class="checkbox-item">
-                            <input type="checkbox" id="atl9" value="Creative">
-                            <label for="atl9">Creative Thinking Skills</label>
-                        </div>
-                        <div class="checkbox-item">
-                            <input type="checkbox" id="atl10" value="Transfer">
-                            <label for="atl10">Transfer Skills</label>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="form-group" style="margin-top: 30px;">
-                    <label>GESS AI Acceptable Use Level (0-4)</label>
-                    <div class="ai-level-container">
-                        <button type="button" class="ai-level-btn" onclick="selectAILevel(0)">
-                            <strong>Level 0</strong>
-                            <small>No AI Use</small>
-                        </button>
-                        <button type="button" class="ai-level-btn" onclick="selectAILevel(1)">
-                            <strong>Level 1</strong>
-                            <small>Minimal AI Use</small>
-                        </button>
-                        <button type="button" class="ai-level-btn" onclick="selectAILevel(2)">
-                            <strong>Level 2</strong>
-                            <small>Moderate AI Use</small>
-                        </button>
-                        <button type="button" class="ai-level-btn" onclick="selectAILevel(3)">
-                            <strong>Level 3</strong>
-                            <small>Significant AI Use</small>
-                        </button>
-                        <button type="button" class="ai-level-btn" onclick="selectAILevel(4)">
-                            <strong>Level 4</strong>
-                            <small>Full AI Use</small>
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Step 7: Custom Rubric -->
-            <div class="step" id="step7">
-                <h2>Custom Rubric (Optional)</h2>
-                <p style="margin-bottom: 20px; color: #6c757d;">Add task-specific band descriptors if needed.</p>
-                <div class="form-group">
-                    <label for="customRubric">Custom Rubric Details</label>
-                    <textarea id="customRubric" placeholder="Enter custom rubric descriptors..." rows="8"></textarea>
-                </div>
-            </div>
-
-            <!-- Step 8: Preview and Download -->
-            <div class="step" id="step8">
-                <div class="success-message">
-                    <i class="fas fa-check-circle"></i>
-                    <h2>Assessment Task Sheet Ready!</h2>
-                    <p>Your document has been generated and is ready to download.</p>
-                    <button class="btn btn-primary" onclick="downloadDocument()">
-                        <i class="fas fa-download"></i> Download Document
-                    </button>
-                </div>
-                <div class="preview-section">
-                    <h3>Document Summary</h3>
-                    <div id="documentSummary"></div>
-                </div>
-            </div>
-        </div>
-
-        <div class="navigation">
-            <button class="btn btn-secondary" id="prevBtn" onclick="changeStep(-1)" style="display: none;">
-                <i class="fas fa-arrow-left"></i> Previous
-            </button>
-            <button class="btn btn-primary" id="nextBtn" onclick="changeStep(1)" disabled>
-                Next <i class="fas fa-arrow-right"></i>
-            </button>
-        </div>
-    </div>
-
-    <script>
-        let currentStep = 1;
-        let selectedProgramme = '';
-        let selectedAILevel = null;
-        let formData = {};
-
-        // Subject lists for each programme
-        const subjects = {
-            'MYP': [
-                'Language and Literature',
-                'Language Acquisition',
-                'Individuals and Societies',
-                'Sciences',
-                'Mathematics',
-                'Arts',
-                'Physical and Health Education',
-                'Design'
-            ],
-            'DP': [
-                'Language A: Literature',
-                'Language A: Language and Literature',
-                'Language B',
-                'Individuals and Societies',
-                'Sciences',
-                'Mathematics',
-                'Arts'
-            ],
-            'CP': [
-                'Language and Literature',
-                'Language Acquisition',
-                'Individuals and Societies',
-                'Sciences',
-                'Mathematics',
-                'Arts',
-                'Career-related Study'
-            ]
-        };
-
-        // Criteria for MYP subjects
-        const mypCriteria = {
-            'Language and Literature': [
-                { name: 'Criterion A', description: 'Analyzing', strands: ['i', 'ii', 'iii', 'iv'] },
-                { name: 'Criterion B', description: 'Organizing', strands: ['i', 'ii', 'iii'] },
-                { name: 'Criterion C', description: 'Producing text', strands: ['i', 'ii', 'iii', 'iv'] },
-                { name: 'Criterion D', description: 'Using language', strands: ['i', 'ii', 'iii'] }
-            ],
-            'Sciences': [
-                { name: 'Criterion A', description: 'Knowing and understanding', strands: ['i', 'ii', 'iii'] },
-                { name: 'Criterion B', description: 'Inquiring and designing', strands: ['i', 'ii', 'iii'] },
-                { name: 'Criterion C', description: 'Processing and evaluating', strands: ['i', 'ii', 'iii', 'iv'] },
-                { name: 'Criterion D', description: 'Reflecting on the impacts of science', strands: ['i', 'ii'] }
-            ],
-            'Mathematics': [
-                { name: 'Criterion A', description: 'Knowing and understanding', strands: ['i', 'ii', 'iii', 'iv'] },
-                { name: 'Criterion B', description: 'Investigating patterns', strands: ['i', 'ii', 'iii'] },
-                { name: 'Criterion C', description: 'Communicating', strands: ['i', 'ii', 'iii', 'iv'] },
-                { name: 'Criterion D', description: 'Applying mathematics in real-life contexts', strands: ['i', 'ii', 'iii'] }
-            ]
-        };
-
-        function selectProgramme(programme) {
-            selectedProgramme = programme;
-            
-            // Remove selected class from all buttons
-            document.querySelectorAll('.programme-btn').forEach(btn => {
-                btn.classList.remove('selected');
-            });
-            
-            // Add selected class to clicked button
-            event.currentTarget.classList.add('selected');
-            
-            // Populate subjects dropdown
-            populateSubjects(programme);
-            
-            // Enable next button
-            const nextBtn = document.getElementById('nextBtn');
-            if (nextBtn) {
-                nextBtn.disabled = false;
-            }
-            
-            console.log('Programme selected:', programme);
-        }
-
-        function populateSubjects(programme) {
-            const subjectSelect = document.getElementById('subject');
-            subjectSelect.innerHTML = '<option value="">Select a subject...</option>';
-            
-            if (subjects[programme]) {
-                subjects[programme].forEach(subject => {
-                    const option = document.createElement('option');
-                    option.value = subject;
-                    option.textContent = subject;
-                    subjectSelect.appendChild(option);
-                });
-            }
-        }
-
-        function selectAILevel(level) {
-            selectedAILevel = level;
-            
-            // Remove selected class from all AI level buttons
-            document.querySelectorAll('.ai-level-btn').forEach(btn => {
-                btn.classList.remove('selected');
-            });
-            
-            // Add selected class to clicked button
-            event.currentTarget.classList.add('selected');
-        }
-
-        function changeStep(direction) {
-            const steps = document.querySelectorAll('.step');
-            const progressSteps = document.querySelectorAll('.progress-step');
-            
-            // Hide current step
-            steps[currentStep - 1].classList.remove('active');
-            progressSteps[currentStep - 1].classList.remove('active');
-            progressSteps[currentStep - 1].classList.add('completed');
-            
-            // Update step number
-            currentStep += direction;
-            
-            // Show new step
-            steps[currentStep - 1].classList.add('active');
-            progressSteps[currentStep - 1].classList.add('active');
-            
-            // Update navigation buttons
-            updateNavigationButtons();
-            
-            // Populate criteria if moving to step 4
-            if (currentStep === 4) {
-                populateCriteria();
-            }
-            
-            // Generate success criteria if moving to step 5
-            if (currentStep === 5) {
-                generateSuccessCriteria();
-            }
-            
-            // Generate preview if moving to step 8
-            if (currentStep === 8) {
-                generatePreview();
-            }
-        }
-
-        function updateNavigationButtons() {
-            const prevBtn = document.getElementById('prevBtn');
-            const nextBtn = document.getElementById('nextBtn');
-            
-            // Show/hide previous button
-            if (currentStep === 1) {
-                prevBtn.style.display = 'none';
-            } else {
-                prevBtn.style.display = 'inline-block';
-            }
-            
-            // Update next button text and visibility
-            if (currentStep === 8) {
-                nextBtn.style.display = 'none';
-            } else {
-                nextBtn.style.display = 'inline-block';
-                nextBtn.textContent = 'Next ';
-                nextBtn.innerHTML += '<i class="fas fa-arrow-right"></i>';
-            }
-            
-            // Enable/disable next button based on step
-            nextBtn.disabled = false;
-        }
-
-        function populateCriteria() {
-            const criteriaList = document.getElementById('criteriaList');
-            criteriaList.innerHTML = '';
-            
-            const subject = document.getElementById('subject').value;
-            const criteria = mypCriteria[subject] || [
-                { name: 'Criterion A', description: 'Knowledge and understanding', strands: ['i', 'ii', 'iii'] },
-                { name: 'Criterion B', description: 'Application', strands: ['i', 'ii', 'iii'] },
-                { name: 'Criterion C', description: 'Communication', strands: ['i', 'ii', 'iii'] },
-                { name: 'Criterion D', description: 'Thinking', strands: ['i', 'ii', 'iii'] }
-            ];
-            
-            criteria.forEach((criterion, index) => {
-                const item = document.createElement('div');
-                item.className = 'checkbox-item';
-                item.innerHTML = `
-                    <input type="checkbox" id="criterion${index}" value="${criterion.name}" checked>
-                    <label for="criterion${index}">${criterion.name}: ${criterion.description}</label>
-                `;
-                criteriaList.appendChild(item);
-            });
-        }
-
-        function generateSuccessCriteria() {
-            const container = document.getElementById('successCriteriaContainer');
-            container.innerHTML = '';
-            
-            const checkedCriteria = Array.from(document.querySelectorAll('#criteriaList input[type="checkbox"]:checked'));
-            
-            checkedCriteria.forEach(checkbox => {
-                const criterionName = checkbox.value;
-                const group = document.createElement('div');
-                group.className = 'form-group';
-                group.innerHTML = `
-                    <label>${criterionName} Success Criteria</label>
-                    <textarea placeholder="Describe what students need to demonstrate for ${criterionName}..." rows="4"></textarea>
-                `;
-                container.appendChild(group);
-            });
-        }
-
-        function generatePreview() {
-            const summary = document.getElementById('documentSummary');
-            const subject = document.getElementById('subject').value;
-            const grade = document.getElementById('grade').value;
-            const teacher = document.getElementById('teacher').value;
-            const unitTitle = document.getElementById('unitTitle').value;
-            
-            summary.innerHTML = `
-                <p><strong>Programme:</strong> ${selectedProgramme}</p>
-                <p><strong>Subject:</strong> ${subject}</p>
-                <p><strong>Grade:</strong> ${grade}</p>
-                <p><strong>Unit:</strong> ${unitTitle}</p>
-                <p><strong>Teacher:</strong> ${teacher}</p>
-                <p><strong>AI Level:</strong> ${selectedAILevel !== null ? selectedAILevel : 'Not specified'}</p>
-            `;
-        }
-
-        function downloadDocument() {
-            alert('Document download functionality would be implemented here using the docx library.');
-            // This would use the docx library to generate a Word document
-            // with all the collected information
-        }
-
-        // Initialize
-        document.addEventListener('DOMContentLoaded', function() {
-            updateNavigationButtons();
-        });
-    </script>
-</body>
-</html>

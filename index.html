@@ -186,7 +186,20 @@
             margin-top: 20px;
         }
 
-        .programme-btn {
+        /* CRITICAL FIX: Use input radio buttons with labels */
+        .programme-option {
+            position: relative;
+        }
+
+        .programme-option input[type="radio"] {
+            position: absolute;
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .programme-label {
+            display: block;
             padding: 30px 20px;
             border: 3px solid #e9ecef;
             border-radius: 12px;
@@ -194,34 +207,31 @@
             cursor: pointer;
             transition: all 0.3s;
             text-align: center;
-            user-select: none;
         }
 
-        .programme-btn:hover {
+        .programme-label:hover {
             border-color: var(--gess-green);
             transform: translateY(-5px);
             box-shadow: 0 10px 20px rgba(0, 166, 81, 0.2);
         }
 
-        .programme-btn.selected {
-            border-color: var(--gess-green) !important;
-            background: var(--gess-light-green) !important;
+        .programme-option input[type="radio"]:checked + .programme-label {
+            border-color: var(--gess-green);
+            background: var(--gess-light-green);
         }
 
-        .programme-btn i {
+        .programme-label i {
             font-size: 40px;
             color: var(--gess-green);
             margin-bottom: 15px;
             display: block;
-            pointer-events: none;
         }
 
-        .programme-btn span {
+        .programme-label span {
             display: block;
             font-weight: 600;
             color: #333;
             font-size: 16px;
-            pointer-events: none;
         }
 
         .checkbox-group {
@@ -339,15 +349,25 @@
         }
 
         .ai-level-container {
-            display: flex;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
             gap: 15px;
-            flex-wrap: wrap;
             margin-top: 10px;
         }
 
-        .ai-level-btn {
-            flex: 1;
-            min-width: 150px;
+        .ai-option {
+            position: relative;
+        }
+
+        .ai-option input[type="radio"] {
+            position: absolute;
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .ai-label {
+            display: block;
             padding: 15px;
             border: 2px solid #e9ecef;
             border-radius: 8px;
@@ -355,31 +375,28 @@
             cursor: pointer;
             transition: all 0.3s;
             text-align: center;
-            user-select: none;
         }
 
-        .ai-level-btn:hover {
+        .ai-label:hover {
             border-color: var(--gess-green);
             transform: translateY(-2px);
         }
 
-        .ai-level-btn.selected {
-            border-color: var(--gess-green) !important;
-            background: var(--gess-light-green) !important;
+        .ai-option input[type="radio"]:checked + .ai-label {
+            border-color: var(--gess-green);
+            background: var(--gess-light-green);
         }
 
-        .ai-level-btn strong {
+        .ai-label strong {
             display: block;
             margin-bottom: 5px;
             color: #333;
-            pointer-events: none;
         }
 
-        .ai-level-btn small {
+        .ai-label small {
             display: block;
             color: #6c757d;
             font-size: 12px;
-            pointer-events: none;
         }
 
         .success-message {
@@ -477,190 +494,29 @@
             <div class="step active" id="step1">
                 <h2>Select Your Programme</h2>
                 <div class="programme-selection">
-                    <div class="programme-btn" data-programme="MYP">
-                        <i class="fas fa-graduation-cap"></i>
-                        <span>Middle Years Programme (MYP)</span>
+                    <div class="programme-option">
+                        <input type="radio" name="programme" id="prog-myp" value="MYP">
+                        <label for="prog-myp" class="programme-label">
+                            <i class="fas fa-graduation-cap"></i>
+                            <span>Middle Years Programme (MYP)</span>
+                        </label>
                     </div>
-                    <div class="programme-btn" data-programme="DP">
-                        <i class="fas fa-user-graduate"></i>
-                        <span>Diploma Programme (DP)</span>
+                    <div class="programme-option">
+                        <input type="radio" name="programme" id="prog-dp" value="DP">
+                        <label for="prog-dp" class="programme-label">
+                            <i class="fas fa-user-graduate"></i>
+                            <span>Diploma Programme (DP)</span>
+                        </label>
                     </div>
-                    <div class="programme-btn" data-programme="CP">
-                        <i class="fas fa-briefcase"></i>
-                        <span>Career-related Programme (CP)</span>
+                    <div class="programme-option">
+                        <input type="radio" name="programme" id="prog-cp" value="CP">
+                        <label for="prog-cp" class="programme-label">
+                            <i class="fas fa-briefcase"></i>
+                            <span>Career-related Programme (CP)</span>
+                        </label>
                     </div>
                 </div>
             </div>
 
             <!-- Step 2: Subject and Class Details -->
             <div class="step" id="step2">
-                <h2>Subject and Class Details</h2>
-                <div class="form-group">
-                    <label for="subject">Subject</label>
-                    <select id="subject" required>
-                        <option value="">Select a subject...</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="grade">Grade/Year</label>
-                    <select id="grade" required>
-                        <option value="">Select grade...</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="dueDate">Due Date</label>
-                    <input type="date" id="dueDate" required>
-                </div>
-                <div class="form-group">
-                    <label for="homeroom">Homeroom</label>
-                    <input type="text" id="homeroom" placeholder="e.g., 9A" required>
-                </div>
-                <div class="form-group">
-                    <label for="unitTitle">Unit Title</label>
-                    <input type="text" id="unitTitle" placeholder="Enter unit title" required>
-                </div>
-                <div class="form-group">
-                    <label for="teacher">Teacher Name</label>
-                    <input type="text" id="teacher" placeholder="Enter teacher name" required>
-                </div>
-            </div>
-
-            <!-- Step 3: Task Information -->
-            <div class="step" id="step3">
-                <h2>Task Information</h2>
-                <div class="form-group">
-                    <label for="assessmentForm">Form of Assessment</label>
-                    <input type="text" id="assessmentForm" placeholder="e.g., Written assignment, Presentation" required>
-                </div>
-                <div class="form-group">
-                    <label for="taskDescription">Task Description</label>
-                    <textarea id="taskDescription" placeholder="Describe the assessment task..." required></textarea>
-                </div>
-                <div class="form-group">
-                    <label for="statementOfInquiry">Statement of Inquiry</label>
-                    <textarea id="statementOfInquiry" placeholder="Enter the statement of inquiry..."></textarea>
-                </div>
-                <div class="form-group">
-                    <label for="keyConcepts">Key Concepts</label>
-                    <input type="text" id="keyConcepts" placeholder="e.g., Change, Systems">
-                </div>
-                <div class="form-group">
-                    <label for="globalContext">Global Context</label>
-                    <input type="text" id="globalContext" placeholder="e.g., Identities and relationships">
-                </div>
-            </div>
-
-            <!-- Step 4: Criteria Selection -->
-            <div class="step" id="step4">
-                <h2>Select Assessment Criteria and Strands</h2>
-                <p style="margin-bottom: 20px; color: #6c757d;">Select the criteria and specific strands you want to assess.</p>
-                <div id="criteriaList">
-                    <!-- Criteria will be populated dynamically -->
-                </div>
-            </div>
-
-            <!-- Step 5: Success Criteria -->
-            <div class="step" id="step5">
-                <h2>Success Criteria</h2>
-                <p style="margin-bottom: 20px; color: #6c757d;">Define what students need to demonstrate for each criterion level.</p>
-                <div id="successCriteriaContainer">
-                    <!-- Success criteria inputs will be generated dynamically -->
-                </div>
-            </div>
-
-            <!-- Step 6: ATL Skills and AI Level -->
-            <div class="step" id="step6">
-                <h2>ATL Skills & AI Acceptable Use</h2>
-                <div class="form-group">
-                    <label>Select ATL Skills (Approaches to Learning)</label>
-                    <div class="checkbox-group" id="atlSkills">
-                        <div class="checkbox-item">
-                            <input type="checkbox" id="atl1" value="Thinking Skills">
-                            <label for="atl1">Thinking Skills</label>
-                        </div>
-                        <div class="checkbox-item">
-                            <input type="checkbox" id="atl2" value="Social Skills">
-                            <label for="atl2">Social Skills</label>
-                        </div>
-                        <div class="checkbox-item">
-                            <input type="checkbox" id="atl3" value="Communication Skills">
-                            <label for="atl3">Communication Skills</label>
-                        </div>
-                        <div class="checkbox-item">
-                            <input type="checkbox" id="atl4" value="Self-Management Skills">
-                            <label for="atl4">Self-Management Skills</label>
-                        </div>
-                        <div class="checkbox-item">
-                            <input type="checkbox" id="atl5" value="Research Skills">
-                            <label for="atl5">Research Skills</label>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="form-group" style="margin-top: 30px;">
-                    <label>GESS AI Acceptable Use Level (0-4)</label>
-                    <div class="ai-level-container">
-                        <div class="ai-level-btn" data-level="0">
-                            <strong>Level 0</strong>
-                            <small>No AI Use</small>
-                        </div>
-                        <div class="ai-level-btn" data-level="1">
-                            <strong>Level 1</strong>
-                            <small>AI-Assisted Idea Generation</small>
-                        </div>
-                        <div class="ai-level-btn" data-level="2">
-                            <strong>Level 2</strong>
-                            <small>AI-Assisted Editing</small>
-                        </div>
-                        <div class="ai-level-btn" data-level="3">
-                            <strong>Level 3</strong>
-                            <small>AI Creation</small>
-                        </div>
-                        <div class="ai-level-btn" data-level="4">
-                            <strong>Level 4</strong>
-                            <small>Full AI Use</small>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Step 7: Custom Rubric -->
-            <div class="step" id="step7">
-                <h2>Custom Rubric (Optional)</h2>
-                <p style="margin-bottom: 20px; color: #6c757d;">Add task-specific band descriptors if needed.</p>
-                <div class="form-group">
-                    <label for="customRubric">Custom Rubric Details</label>
-                    <textarea id="customRubric" placeholder="Enter custom rubric descriptors..." rows="8"></textarea>
-                </div>
-            </div>
-
-            <!-- Step 8: Preview and Download -->
-            <div class="step" id="step8">
-                <div class="success-message">
-                    <i class="fas fa-check-circle"></i>
-                    <h2>Assessment Task Sheet Ready!</h2>
-                    <p>Your document has been generated and is ready to download.</p>
-                    <button class="btn btn-primary" id="downloadBtn">
-                        <i class="fas fa-download"></i> Download Document
-                    </button>
-                </div>
-                <div class="preview-section">
-                    <h3>Document Summary</h3>
-                    <div id="documentSummary"></div>
-                </div>
-            </div>
-        </div>
-
-        <div class="navigation">
-            <button class="btn btn-secondary" id="prevBtn" style="display: none;">
-                <i class="fas fa-arrow-left"></i> Previous
-            </button>
-            <button class="btn btn-primary" id="nextBtn" disabled>
-                Next <i class="fas fa-arrow-right"></i>
-            </button>
-        </div>
-    </div>
-
-    <script src="app.js"></script>
-</body>
-</html>

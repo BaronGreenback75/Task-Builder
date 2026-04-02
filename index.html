@@ -471,18 +471,18 @@
             <div class="step active" id="step1">
                 <h2>Select Your Programme</h2>
                 <div class="programme-selection">
-                    <button type="button" class="programme-btn" id="btnMYP">
+                    <div class="programme-btn" onclick="selectProgramme('MYP', this)">
                         <i class="fas fa-graduation-cap"></i>
                         <span>Middle Years Programme (MYP)</span>
-                    </button>
-                    <button type="button" class="programme-btn" id="btnDP">
+                    </div>
+                    <div class="programme-btn" onclick="selectProgramme('DP', this)">
                         <i class="fas fa-user-graduate"></i>
                         <span>Diploma Programme (DP)</span>
-                    </button>
-                    <button type="button" class="programme-btn" id="btnCP">
+                    </div>
+                    <div class="programme-btn" onclick="selectProgramme('CP', this)">
                         <i class="fas fa-briefcase"></i>
                         <span>Career-related Programme (CP)</span>
-                    </button>
+                    </div>
                 </div>
             </div>
 
@@ -513,5 +513,4 @@
                     <label for="unitTitle">Unit Title</label>
                     <input type="text" id="unitTitle" placeholder="Enter unit title" required>
                 </div>
-                <div class="form-group">
-                    <label for
+                <div class
